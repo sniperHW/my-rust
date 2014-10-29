@@ -624,3 +624,246 @@ Rust编译器对我们的工作提供了极大的帮助!这种技术被称为“
 
 #### 14.5 添加循环
 
+如我们先前讨论过的,`loop`关键字为我们提供了无限循环.我们将它添加到代码中:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        loop {
+    
+            println!("Please input your guess.");
+    
+            let input = io::stdin().read_line()
+                                   .ok()
+                                   .expect("Failed to read line");
+            let input_num: Option<uint> = from_str(input.as_slice().trim());
+    
+            let num = match input_num {
+                Some(num) => num,
+                None      => {
+                    println!("Please input a number!");
+                    return;
+                }
+            };
+    
+    
+            println!("You guessed: {}", num);
+    
+            match cmp(num, secret_number) {
+                Less    => println!("Too small!"),
+                Greater => println!("Too big!"),
+                Equal   => println!("You win!"),
+            }
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+虽然我们添加了一个无限循环,但记住当输入非数字的时候我们使用了`return`,这会导致程序的退出:
+
+    $ cargo run
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+         Running `target/guessing_game`
+    Guess the number!
+    The secret number is: 59
+    Please input your guess.
+    45
+    You guessed: 45
+    Too small!
+    Please input your guess.
+    60
+    You guessed: 60
+    Too big!
+    Please input your guess.
+    59
+    You guessed: 59
+    You win!
+    Please input your guess.
+    quit
+    Please input a number!
+    
+输入quit的时候我们退出了程序,而实际上你输入任何非数字都会导致程序退出.现在让我们调整下代码,当成功猜到数字的时候让程序退出:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        loop {
+    
+            println!("Please input your guess.");
+    
+            let input = io::stdin().read_line()
+                                   .ok()
+                                   .expect("Failed to read line");
+            let input_num: Option<uint> = from_str(input.as_slice().trim());
+    
+            let num = match input_num {
+                Some(num) => num,
+                None      => {
+                    println!("Please input a number!");
+                    return;
+                }
+            };
+    
+    
+            println!("You guessed: {}", num);
+    
+            match cmp(num, secret_number) {
+                Less    => println!("Too small!"),
+                Greater => println!("Too big!"),
+                Equal   => {
+                    println!("You win!");
+                    return;
+                },
+            }
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+通过在`You win!`的后面添加`return`,当我们胜利的时候程序就会结束.然后我们希望当玩家输入非数字的时候不是退出程序,而只是忽略这个输入.我们可以通过将第一个`return`改成`continue`来实现:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        loop {
+    
+            println!("Please input your guess.");
+    
+            let input = io::stdin().read_line()
+                                   .ok()
+                                   .expect("Failed to read line");
+            let input_num: Option<uint> = from_str(input.as_slice().trim());
+    
+            let num = match input_num {
+                Some(num) => num,
+                None      => {
+                    println!("Please input a number!");
+                    continue;
+                }
+            };
+    
+    
+            println!("You guessed: {}", num);
+    
+            match cmp(num, secret_number) {
+                Less    => println!("Too small!"),
+                Greater => println!("Too big!"),
+                Equal   => {
+                    println!("You win!");
+                    return;
+                },
+            }
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+让我们再来尝试一下:
+
+    $ cargo run
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+         Running `target/guessing_game`
+    Guess the number!
+    The secret number is: 61
+    Please input your guess.
+    10
+    You guessed: 10
+    Too small!
+    Please input your guess.
+    99
+    You guessed: 99
+    Too big!
+    Please input your guess.
+    foo
+    Please input a number!
+    Please input your guess.
+    61
+    You guessed: 61
+    You win!
+    
+漂亮!还差最后一点我们就完成猜迷游戏了.不再将`secret_number`输出到屏幕.下面就是完整的代码:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        loop {
+    
+            println!("Please input your guess.");
+    
+            let input = io::stdin().read_line()
+                                   .ok()
+                                   .expect("Failed to read line");
+            let input_num: Option<uint> = from_str(input.as_slice().trim());
+    
+            let num = match input_num {
+                Some(num) => num,
+                None      => {
+                    println!("Please input a number!");
+                    continue;
+                }
+            };
+    
+    
+            println!("You guessed: {}", num);
+    
+            match cmp(num, secret_number) {
+                Less    => println!("Too small!"),
+                Greater => println!("Too big!"),
+                Equal   => {
+                    println!("You win!");
+                    return;
+                },
+            }
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+#### 14.6 完结
+
+到此,首先恭喜完成了猜谜游戏的构建!
+
+你已经了学会了Rust的基本语法.所有的这些应该与你以前接触过的其它程序设计语言有点相似.这些基本的语法和语义元素将是你后续对Rust进行更深入学习的基石.
+
