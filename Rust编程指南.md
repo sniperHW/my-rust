@@ -332,5 +332,295 @@ Cargo从当前环境中获取这些信息,如果有不对的地方你可以自�
 
 编译并运行程序几次：
 
+    $ cargo run
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+         Running `target/guessing_game`
+    Guess the number!
+    The secret number is: 57
+    Please input your guess.
+    3
+    You guessed: 3
     
+这回正常了,我们接着要实现`secret_number`与玩家猜测数的比较.
+    
+#### 14.4 与猜测值比较
+
+你可能还记得我们在前面的章节中实现过用于比较两个数字大小的`cmp`函数.让我们把`cmp`加进去,再添加一段代码将玩家的猜测值与`secret_number`做比较:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        println!("Please input your guess.");
+    
+        let input = io::stdin().read_line()
+                               .ok()
+                               .expect("Failed to read line");
+    
+    
+        println!("You guessed: {}", input);
+    
+        match cmp(input, secret_number) {
+            Less    => println!("Too small!"),
+            Greater => println!("Too big!"),
+            Equal   => println!("You win!"),
+        }
+    }
+    
+    fn cmp(a: int, b: int) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+
+如果我们尝试编译这段代码,我们会得到如下错误:
+
+    $ cargo build
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+    src/main.rs:20:15: 20:20 error: mismatched types: expected `int` but found `collections::string::String` (expected int but found struct collections::string::String)
+    src/main.rs:20     match cmp(input, secret_number) {
+                                 ^~~~~
+    src/main.rs:20:22: 20:35 error: mismatched types: expected `int` but found `uint` (expected int but found uint)
+    src/main.rs:20     match cmp(input, secret_number) {
+                                        ^~~~~~~~~~~~~
+    error: aborting due to 2 previous errors
+    
+这在编写Rust程序的时候会经常出现,而这是Rust最大的优势之一.你尝试编译代码,如果编译不通过,Rust会提示你哪里出现了错误.在此例中,`cmp`函数需要的是整型参数,而我们提供的是无符号整型.我们可以通过将`cmp`的参数改为`uint`来修正这个问题:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        println!("Please input your guess.");
+    
+        let input = io::stdin().read_line()
+                               .ok()
+                               .expect("Failed to read line");
+    
+    
+        println!("You guessed: {}", input);
+    
+        match cmp(input, secret_number) {
+            Less    => println!("Too small!"),
+            Greater => println!("Too big!"),
+            Equal   => println!("You win!"),
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+再尝试编译代码:
+
+    $ cargo build
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+    src/main.rs:20:15: 20:20 error: mismatched types: expected `uint` but found `collections::string::String` (expected uint but found struct collections::string::String)
+    src/main.rs:20     match cmp(input, secret_number) {
+                                 ^~~~~
+    error: aborting due to previous error    
+
+错误与上次的类似,期望`uint`的参数,但得到的却是`String`类型.这是因为我们是从标准输入获得的猜测值,
+而实际上你可以在标准输入中输入任何内容,例如:
+
+    $ ./target/guessing_game
+    Guess the number!
+    The secret number is: 73
+    Please input your guess.
+    hello
+    You guessed: hello
+    
+好吧,我们获得的是`String`类型,而我们需要的是`uint`.怎么办呢?有一个函数可以为我们处理这种情况:
+
+    let input = io::stdin().read_line()
+                           .ok()
+                           .expect("Failed to read line");
+    let input_num: Option<uint> = from_str(input.as_slice());
+    
+`from_str`函数将一个`&str`的值转换成其它类型.我们需要为它提供一个提示使得它能正确的完成转换.还记得我们给`random()`的提示吗?像这个样子:
+
+    rand::random::<uint>();
+    
+还有另外一种提示方式,将类型声明添加到`let`中:
+
+    let x: uint = rand::random();
+    
+这相当于显式的通告`x`是`unit`类型,所以Rust可以正确的告诉`random()`函数要生成什么类型的值.类似的,下面两种方式都是合法的:
+
+    let input_num = from_str::<uint>("5");
+    let input_num: Option<uint> = from_str("5");
+    
+现在让我们将输入转换成数值型,代码如下:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        println!("Please input your guess.");
+    
+        let input = io::stdin().read_line()
+                               .ok()
+                               .expect("Failed to read line");
+        let input_num: Option<uint> = from_str(input.as_slice());
+    
+        println!("You guessed: {}", input_num);
+    
+        match cmp(input_num, secret_number) {
+            Less    => println!("Too small!"),
+            Greater => println!("Too big!"),
+            Equal   => println!("You win!"),
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+编译:
+
+    $ cargo build
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+    src/main.rs:22:15: 22:24 error: mismatched types: expected `uint` but found `core::option::Option<uint>` (expected uint but found enum core::option::Option)
+    src/main.rs:22     match cmp(input_num, secret_number) {
+                                 ^~~~~~~~~
+    error: aborting due to previous error
+    
+好吧,`input_num`的类型是`Option<uint>`而不是`uint`.我们需要将`Option`中的内容解包.如果你还记得前面的内容,`match`用来处理这种情况最好不过了:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        println!("Please input your guess.");
+    
+        let input = io::stdin().read_line()
+                               .ok()
+                               .expect("Failed to read line");
+        let input_num: Option<uint> = from_str(input.as_slice());
+    
+        let num = match input_num {
+            Some(num) => num,
+            None      => {
+                println!("Please input a number!");
+                return;
+            }
+        };
+    
+    
+        println!("You guessed: {}", num);
+    
+        match cmp(num, secret_number) {
+            Less    => println!("Too small!"),
+            Greater => println!("Too big!"),
+            Equal   => println!("You win!"),
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    } 
+    
+我们通过`match`来提取`Option`中的`uint`值,如果失败输出提示消息并退出程序.让我们试下:
+
+    $ cargo run
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+         Running `target/guessing_game`
+    Guess the number!
+    The secret number is: 17
+    Please input your guess.
+    5
+    Please input a number!
+    
+还是失败了.当我们从`stdin()`中获取输入时,我们实际上获得了所有的键盘输入,包括你按下的回车符.所以当`from_str()`看到"5\n"的时候,会抱怨这里没有数字.幸运的是`&str`有一个`trim()`方法可以处理这种情况.我们对代码做如下修改:
+
+    use std::io;
+    use std::rand;
+    
+    fn main() {
+        println!("Guess the number!");
+    
+        let secret_number = (rand::random::<uint>() % 100u) + 1u;
+    
+        println!("The secret number is: {}", secret_number);
+    
+        println!("Please input your guess.");
+    
+        let input = io::stdin().read_line()
+                               .ok()
+                               .expect("Failed to read line");
+        let input_num: Option<uint> = from_str(input.as_slice().trim());
+    
+        let num = match input_num {
+            Some(num) => num,
+            None      => {
+                println!("Please input a number!");
+                return;
+            }
+        };
+    
+    
+        println!("You guessed: {}", num);
+    
+        match cmp(num, secret_number) {
+            Less    => println!("Too small!"),
+            Greater => println!("Too big!"),
+            Equal   => println!("You win!"),
+        }
+    }
+    
+    fn cmp(a: uint, b: uint) -> Ordering {
+        if a < b { Less }
+        else if a > b { Greater }
+        else { Equal }
+    }
+    
+再试一下:
+
+    $ cargo run
+       Compiling guessing_game v0.0.1 (file:///home/you/projects/guessing_game)
+         Running `target/guessing_game`
+    Guess the number!
+    The secret number is: 58
+    Please input your guess.
+      76
+    You guessed: 76
+    Too big!
+    
+漂亮!这次程序正常的工作了.
+
+Rust编译器对我们的工作提供了极大的帮助!这种技术被称为“从编译器中学习”.通过编译器输出的错误提示来指引我们修正错误.
+
+现在我们的猜谜游戏已经基本完成,唯一的问题是我们只能猜一次,让我们为它添加一个循环处理来解决这个问题.
+
+#### 14.5 添加循环
 
