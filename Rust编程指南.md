@@ -155,9 +155,10 @@
     
 我们每次都检查,看是否获得了一个值.对于这个示例来说,我们已经知道了`x`是有值的.但`match`语句强迫我们处理`missing`的情况.在99%的情况下这可能就是我们想要的,但在有些情况下,我们比编译器更清除自己想要的是什么.
 
-类似的,`read_line()`并不是一定会返回从标准输入中读取到的正行数据.它可能成功也可能失败.例如如果我们的程序并不是运行在终端环境中,而是作为一个corn任务运行,或者在其它没有标准输入的环境中运行,`read_line`就会失败.因此,`read_line`的返回值是一个与`OptionalInt` 有点类似的类型:`IoResult<T>`.我们还没有讨论过`IoResult<T>`类型,它是比`OptionalInt`更通用的一种形式.但在此,我们可以先简单的认为它们俩是一样的.
+类似的,`read_line()`并不是一定会返回从标准输入中读取到的正行数据.它可能成功也可能失败.例如如果我们的程序并不是运行在终端环境中,而是作为一个corn任务运行,或者在其它没有标准输入的环境中运行,`read_line`就会失败.因此,`read_line`的返回值是一个与`OptionalInt` 有点类似的类型:`IoResult<T>`.我们还没有讨论过`IoResult<T>`类型,它是比`OptionalInt`更通用的一种形式.但在此,我们可以先简单的认为它们二者几乎是等价的.除了`T`可以是任何类型,不仅仅是`int`.
 
-Rust provides a method on these IoResult<T>s called ok(), which does the same thing as our match statement, but assuming that we have a valid value. We then call expect() on the result, which will terminate our program if we don't have a valid value. In this case, if we can't get input, our program doesn't work, so we're okay with that. In most cases, we would want to handle the error case explicitly. expect() allows us to give an error message if this crash happens.
+Rust为`IoResult<T>`提供了一个名叫`ok()`的方法,这个方法做的事情跟我们上面的match语句类似,除了它假设我们应该有一个合法值.
+之后我们在`ok()`的返回值上调用`expect()`,如果没有获得一个有效值程序就会终止.对于目前的情况来说,如果不能获得输入我们的程序就无法继续工作下去,所以这样是合理的.但在通常的情况下,我们需要手动去处理错误情况.`expect`允许我们传递一个字符串来描述错误情况,当程序崩溃的时候可以提示用户.
 
 我们将会在后面的内容中详细讨论这些机制是如何工作的.但就目前来说,以上的介绍已经足够让你了解这段代码是如何工作的了.
 
@@ -866,4 +867,89 @@ Rust编译器对我们的工作提供了极大的帮助!这种技术被称为“
 到此,首先恭喜完成了猜谜游戏的构建!
 
 你已经了学会了Rust的基本语法.所有的这些应该与你以前接触过的其它程序设计语言有点相似.这些基本的语法和语义元素将是你后续对Rust进行更深入学习的基石.
+
+###<span id="15 装货箱和模块">15 装货箱和模块</span>
+
+Rust提供了一种强大的模块化系统,它的工作方式与别的程序设计语言不同.Rust模块系统的两个核心组件是:装货箱和模块.
+
+装箱盒是Rust的编译单元.Rust通常每次编译一个装箱盒,生成一个库或者一个可执行文件.但是,通常来说可执行文件会依赖于一些库,而库又可能依赖于其它的库.为了对此提供支持,装箱盒可以依赖其它的装箱盒.
+
+每个装箱盒中都包含了模块层级树.这棵树起始于一个单一的模块,被称为装箱盒的根.我们可以在根装箱盒里声明其它模块,在这些模块中又可以包含其它的模块.
+
+注意我们到现在都没有提到文件相关的事情.Rust不强制要求文件系统结构和模块结构之间有特定的关系.也就是说,Rust可以按常规的惯例在文件系统中查找模块,也可以不按这种惯例查找.
+
+现在让我们来实践一下!我们建立一个名为`modules`的新项目.
+
+    $ cd ~/projects
+    $ cargo new modules --bin
+    $ cd modules
+    
+让我们检查一下看是否能通过编译:
+
+    $ cargo run
+       Compiling modules v0.0.1 (file:///home/you/projects/modules)
+         Running `target/modules`
+    Hello, world!
+    
+现在我们已经有了一个装箱盒:`src/main.rs`就是一个装箱盒.在那个文件中的任何东西都在根装箱盒中.在这里我们创建了一个产生可执行文件的装箱盒,它的根中只定义了一个`main`函数.
+
+让我们在这个装箱盒中定义一个新的模块.编辑`src/main.rs`如下:
+
+    fn main() {
+        println!("Hello, world!");
+    }
+    
+    mod hello {
+        fn print_hello() {
+            println!("Hello, world!");
+        }
+    }
+    
+现在在我们的装箱盒根中有了一个名为`hello`的模块.模块使用`snake_case`的命名法,跟函数和变量绑定一样.
+
+我们在`hello`模块内定义了`print_hello`函数.这个函数用于输出"hello world".模块让你可以将一个程序的代码按功能和职责分成不同的小块.每一小块只包含相关的东西把其它不相关的隔离在外.
+
+为了调用`print_hello`,我们需要使用双冒号:
+
+    hello::print_hello();   
+
+这种用法我们在`io::stdin()` 和`rand::random()`中就已经见到过.Rust模块系统还有一个可见性规则,用于控制谁可以访问一个模块中定义的函数.默认情况下,一个模块中定义的任何东西都是私有的,也就是说默认情况下一个模块中定义的函数或变量只能被同一个模块中定义的其它函数访问.所以下面的代码将无法通过编译:
+
+    fn main() {
+        hello::print_hello();
+    }
+    
+    mod hello {
+        fn print_hello() {
+            println!("Hello, world!");
+        }
+    }
+    
+编译会出现以下的错误:
+
+       Compiling modules v0.0.1 (file:///home/you/projects/modules)
+    src/main.rs:2:5: 2:23 error: function `print_hello` is private
+    src/main.rs:2     hello::print_hello();
+                      ^~~~~~~~~~~~~~~~~~
+                      
+我们可以使用关键字`pub`将`print_hello`变成公有的:
+
+    fn main() {
+        hello::print_hello();
+    }
+    
+    mod hello {
+        pub fn print_hello() {
+            println!("Hello, world!");
+        }
+    }
+    
+使用`pub`有时被称为导出,因为我们让被标记为`pub`的函数可以在其它模块中调用.所以现在编译可以通过了:
+
+    $ cargo run
+       Compiling modules v0.0.1 (file:///home/you/projects/modules)
+         Running `target/modules`
+    Hello, world!
+    
+模块相关的内容还有很多,例如将它移动到单独的文件中.但目前为止的介绍已经足够了.
 
