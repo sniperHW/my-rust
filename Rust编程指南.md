@@ -1021,3 +1021,95 @@ Rust提供了一种强大的模块化系统,它的工作方式与别的程序设
     
 模块相关的内容还有很多,例如将它移动到单独的文件中.但目前为止的介绍已经足够了.
 
+###<span id="17 指针">17 指针</span>
+
+对于系统级编程而言,指针处于一个极其重要的位置.Rust对于指针处理相关的内容相当丰富,对指针的操作也与其它语言有很大的不同.因为指针实在是太重要了,所以有专门的[Rust指针指南](http://doc.rust-lang.org/0.12.0/guide-pointers.html)用于更详细的介绍指针相关的内容.事实上,本指南只是对Rust做了最基本的介绍,针对各主题更详尽的讨论可以在[Rust文档索引页面](http://doc.rust-lang.org/0.12.0/index.html#guides)中找到.
+
+在本章,我们将假设你已经熟悉指针相关的概念.如果你并不是太熟悉,请先浏览[指针导引](http://doc.rust-lang.org/0.12.0/guide-pointers.html#an-introduction)然后再回来接着往下读.
+
+好了现在开始我们的Rust指针旅程吧.
+
+####17.1 引用
+
+在Rust中最基本的指针形式是引用.引用通过`&`操作符创建.下面是一个简单的示例:
+
+    let x = 5i;
+    let y = &x;
+    
+`y`是对`x`的引用.如果要解引用可以使用`*`操作符:
+
+    let x = 5i;
+    let y = &x;
+    
+    assert_eq!(5i, *y);
+    
+与普通的`let`绑定类似,引用在默认的情况下也是不能改变的.
+
+你可以声名一个函数接受引用作为参数:
+
+    fn add_one(x: &int) -> int { *x + 1 }
+    
+    fn main() {
+        assert_eq!(6, add_one(&5));
+    }
+    
+如你所看到的,我们可以通过对字面量使用`&`操作符来创建对它的引用.当然在这里我们仅仅是为了展示用法,在实际中我们没有任何理由在一个如此简单的函数中使用引用的方式传递参数.
+
+因为引用是不可变的,所以你可以创建多个指向同一个变量的引用.
+
+    let x = 5i;
+    let y = &x;
+    let z = &x;
+    
+如果要创建一个可变的引用可以使用`&mut`操作符:
+
+    let mut x = 5i;
+    let y = &mut x;
+    
+必须注意`x`也必须是可变的,如果不是这样,例如下面的例子:
+
+    let x = 5i;
+    let y = &mut x;
+    
+那么当我们尝试编译的时候,编译器将会发出抱怨:
+
+    6:19 error: cannot borrow immutable local variable `x` as mutable
+     let y = &mut x;
+                  ^
+
+我们无法创建一个可变的引用指向不可变的数据!这段错误消息中有一个我们至今为止还没有看到过的术语`租借`.别急,很快我们就会介绍这个术语到底意味着什么.
+
+这个简单的示例实际上展示了Rust一些强大的能力:Rust可以在编译时防止我们违背我们自己所订立的某些规则.而且这种检测完全是在编译时完成的不会给程序的运行带来任何额外的负担.在运行时引用就如C/C++中的指针一样.Rust只不过是在程序可以运行之前做了更严格的检测以防止我们做了些危险的事情.
+
+Rust同时会阻止我们对一个可变对象创建多于一个的可变引用,下面的代码就无法通过编译:
+
+    let mut x = 5i;
+    let y = &mut x;
+    let z = &mut x;
+    
+编译器会发出如下的抱怨:
+
+    error: cannot borrow `x` as mutable more than once at a time
+         let z = &mut x;
+                      ^
+    note: previous borrow of `x` occurs here; the mutable borrow prevents subsequent moves, borrows, or modification of `x` until the borrow ends
+         let y = &mut x;
+                      ^
+    note: previous borrow ends here
+     fn main() {
+         let mut x = 5i;
+         let y = &mut x;
+         let z = &mut x;
+     }
+     ^
+     
+这段输出的内容非常多,让我们来好好的分析一下,它被分成了3部分:一个错误和两个提示.错误部分指出我们不能让两个指针指向同一块内存区域.
+
+而两个提示给出了一些额外的信息.通常如果错误非常复杂,Rust都会给出类似的提示信息,以帮助我们更好的知道错误的原因.在这里Rust为我们给出了两个提示:首先,`z`无法租借`x`的原因是我们之前已经将`x`租借给了`y`.然后标示出了`y`租借结束的地方.
+
+好了,那么租借到底是什么?
+
+为了完全理解上述错误,我们必须学习更多的概念:所有权,租借和生命周期.
+
+####17.2 所有权,租借和生命周期
+
