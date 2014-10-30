@@ -1077,7 +1077,7 @@ Rust提供了一种强大的模块化系统,它的工作方式与别的程序设
      let y = &mut x;
                   ^
 
-我们无法创建一个可变的引用指向不可变的数据!这段错误消息中有一个我们至今为止还没有看到过的术语`租借`.别急,很快我们就会介绍这个术语到底意味着什么.
+我们无法创建一个可变的引用指向不可变的数据!这段错误消息中有一个我们至今为止还没有看到过的术语`借用`.别急,很快我们就会介绍这个术语到底意味着什么.
 
 这个简单的示例实际上展示了Rust一些强大的能力:Rust可以在编译时防止我们违背我们自己所订立的某些规则.而且这种检测完全是在编译时完成的不会给程序的运行带来任何额外的负担.在运行时引用就如C/C++中的指针一样.Rust只不过是在程序可以运行之前做了更严格的检测以防止我们做了些危险的事情.
 
@@ -1105,11 +1105,125 @@ Rust同时会阻止我们对一个可变对象创建多于一个的可变引用,
      
 这段输出的内容非常多,让我们来好好的分析一下,它被分成了3部分:一个错误和两个提示.错误部分指出我们不能让两个指针指向同一块内存区域.
 
-而两个提示给出了一些额外的信息.通常如果错误非常复杂,Rust都会给出类似的提示信息,以帮助我们更好的知道错误的原因.在这里Rust为我们给出了两个提示:首先,`z`无法租借`x`的原因是我们之前已经将`x`租借给了`y`.然后标示出了`y`租借结束的地方.
+而两个提示给出了一些额外的信息.通常如果错误非常复杂,Rust都会给出类似的提示信息,以帮助我们更好的知道错误的原因.在这里Rust为我们给出了两个提示:首先,`z`无法借用`x`的原因是我们之前已经将`x`借用给了`y`.然后标示出了`y`借用结束的地方.
 
-好了,那么租借到底是什么?
+好了,那么借用到底是什么?
 
-为了完全理解上述错误,我们必须学习更多的概念:所有权,租借和生命周期.
+为了完全理解上述错误,我们必须学习更多的概念:所有权,借用和生命周期.
 
-####17.2 所有权,租借和生命周期
+####17.2 所有权,借用和生命周期
+
+当某种资源被创建出来之后,必须有人负责在适当的时候把这个资源销毁.因为我们现在讨论的是指针,所以这里的资源暂时指的是内存分配.
+
+当你在堆上分配一块动态内存之后,需要有一种机制来释放这块内存.有的语言提供了垃圾回收机制,程序员负责控制内存的分配,垃圾回收器负责回收内存.这是一个有效的,久经考验的策略,但不是没有缺点.程序员不再对内存的释放做更深入的了解,分配内存变成一件很平常的事情,因为实在太方便了 但如果所有的这一切都交给运行时去处理,你将很难精确控制内存的销毁时机.
+
+Rust使用了一种不同的方式去处理这个问题,这个方式叫做`所有权`.当我们创建一个变量绑定的时候,如果同时创建了资源,那么这个变量就拥有那个资源的所有权.
+
+作为资源的拥有者,你会获得一些特权:
+
+* 1 你可以控制资源什么时候被销毁
+* 2 以不可变的形式将资源借出去,借给多少人都可以
+* 3 以可变的形式将资源借出去,但同一时间只能借给一个人
+
+但同时,也会受到一些约束:
+
+* 1 如果你已经将资源借出去了(可变或者不可变),那么你将无法改变资源的内容,也不能将资源再一次以可变的形式出借给别人.
+
+* 2 如果你将资源以可变的形式借出去了,那么你将不能再将它借给其它人(可变或不可变),也不能访问资源的内容.
+
+上面的借出和受借是什么意思?当你分配了内存,你就获得了指向那块内存的一个指针.这个指针使得你可以操作那块内存中的内容.如果你是指针的所有者,那么你可以临时的将这个指针借给别人,让受借者可以操作指针指向内存的内容.而受借者借到指针到将指针交换给你的这段时间就被称为受借者的声明周期.
+
+假设有两个变量绑定,它们都被绑定到同一个指针,如果指针指向的内存是不可变的,那么这是没问题的.但如果那块内存是可变的,将可能出现两者同时通过指针修改内存中内容的情况,这被成为竞赛条件.所以,一旦你将资源以可变的形式借给别人,你就不能再将资源借给其它任何人.
+
+Rust提供了一种被称之为`借用检查器`的机制,用来确保没有人违反上面的游戏规则.它在编译时进行检查,如果检查通过那么我们的程序就会成功的编译,且不会增加任何的运行时负担.如果检查器发现有人违背规则,那么它就会提交一个生命周期错误,然后终止编译过程.
+
+虽然已经说了很多,但还有一个在Rust中最重要的概念之一,让我们看下下面的代码:
+
+    {
+        let x = 5i; // x is the owner of this integer, which is memory on the stack.
+    
+        // other code here...
+    
+    } // privilege 1: when x goes out of scope, this memory is deallocated
+    
+    /// this function borrows an integer. It's given back automatically when the
+    /// function returns.
+    fn foo(x: &int) -> &int { x }
+    
+    {
+        let x = 5i; // x is the owner of this integer, which is memory on the stack.
+    
+        // privilege 2: you may lend that resource, to as many borrowers as you'd like
+        let y = &x;
+        let z = &x;
+    
+        foo(&x); // functions can borrow too!
+    
+        let a = &x; // we can do this alllllll day!
+    }
+    
+    {
+        let mut x = 5i; // x is the owner of this integer, which is memory on the stack.
+    
+        let y = &mut x; // privilege 3: you may lend that resource to a single borrower,
+                        // mutably
+    }
+
+如果你是受借者,你也会获得一些特权,当然也同时要受到一些限制:
+
+* 1 如果你借过来的东西是不可变的,那么你可以通过指针读取它所指向的内容.
+* 2 如果你借过来的东西是可变的,那么可以通过指针读写它所指向的内容.
+* 3 你可以将你借到的东西以不可变的形式再借给其它人,但是
+* 4 在别人将东西归还给你之前,你也无法将它归还给借给你的人.
+
+这最后一条要求看似有点奇怪,但它确实有重要的意义.如果你要将东西归还给别人,首先要等到借你东西的人将东西还给你.否则,如果你提前归还了,那么它的拥有者可能将那个资源销毁.那么借你东西的那个人持有的将是一个指向非法内存的指针.这被称之为`悬挂指针`.
+
+现在让我们再回头来看看上一节结尾部分导致编译错误的代码:
+
+    let mut x = 5i;
+    let y = &mut x;
+    let z = &mut x;
+    
+错误如下:
+
+    error: cannot borrow `x` as mutable more than once at a time
+         let z = &mut x;
+                      ^
+    note: previous borrow of `x` occurs here; the mutable borrow prevents subsequent moves, borrows, or modification of `x` until the borrow ends
+         let y = &mut x;
+                      ^
+    note: previous borrow ends here
+     fn main() {
+         let mut x = 5i;
+         let y = &mut x;
+         let z = &mut x;
+     }
+     ^
+
+这个错误分成3部分,让我一部分一部分的给你讲解.
+
+    error: cannot borrow `x` as mutable more than once at a time
+         let z = &mut x;
+                      ^
+                      
+这段错误告诉我们,你不能将资源以可变的形式借给超过一个人.
+
+    note: previous borrow of `x` occurs here; the mutable borrow prevents subsequent moves, borrows, or modification of `x` until the borrow ends
+         let y = &mut x;
+                      ^
+                      
+这部分是一个提示,它帮我们指出第一次出借在什么位置.并提醒我们,在受借者声明周期结束之前我们都不能改变`x`中的内容.
+
+    note: previous borrow ends here
+     fn main() {
+         let mut x = 5i;
+         let y = &mut x;
+         let z = &mut x;
+     }
+     ^
+这部分也是一个提示,它告诉我们第一个受借者,也就是`y`的生命周期在什么地方结束.
+
+想要更深的了解请参考[声明周期指南](http://doc.rust-lang.org/0.12.0/guide-lifetimes.html).在那里你将学习到如何在类型标签上结合使用``a`语法:
+
+pub fn as_maybe_owned(&self) -> MaybeOwned<'a> { ... }
 
