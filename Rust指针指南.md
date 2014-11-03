@@ -9,7 +9,7 @@
 *	[9 Cheat Sheet](#)
 *	[10 Related resources](#循环)
 
-Rust的指针是有其独特和引人注目的特性,也是容易令Rust新人感到迷惑的主题之一.更有甚者,即使你曾经接触过其它支持指针的程序设计语言,如C++.它也会让你产生一定的迷惑.
+Rust的指针有其独特和引人注目的特性,也是容易令Rust新人感到迷惑的主题之一.更有甚者,即使你曾经接触过其它支持指针的程序设计语言,如C++.它也会让你产生一定的迷惑.
 本指南的目的就是帮助你理解Rust中的这个重要的主题.
 
 对指针的使用必须经过深思熟虑,而不是为了让编译器感到爽.每一种指针类型都有其特定的使用场合.
@@ -171,3 +171,144 @@ Rust的指针是有其独特和引人注目的特性,也是容易令Rust新人�
 
 
 
+###<span id="2 引用">2 引用</span>
+
+在Rust中最基本的指针类型被称为引用.Rust引用看上去是这个样子:
+
+    let x = 5i;
+    let y = &x;
+    
+    println!("{}", *y);
+    println!("{:p}", y);
+    println!("{}", y);
+
+我们说`y`引用`x`.第一个`println!`通过对`y`使用解引用操作符`*`打印`y`所引用的值.第二个`println!`通过指针格式串打印出引用所指向的内存地址.而第三个`println!`打印的也是`y`所引用的值,因为`println!`会自动帮我们执行解引用.
+
+下面是一个接受一个引用作为参数的函数:
+
+    fn succ(x: &int) -> int { *x + 1 }
+    
+你还可以将`&`作为操作符创建一个引用,因此我们可以以两种不同的方式调用这个函数:
+
+    fn succ(x: &int) -> int { *x + 1 }
+    
+    fn main() {
+    
+        let x = 5i;
+        let y = &x;
+    
+        println!("{}", succ(y));
+        println!("{}", succ(&x));
+    }
+    
+两个`println!`函数都会打印`6`.
+
+但然在真实世界的代码中这个函数不应该使用引用传递参数,而应该是下面这个样子:
+
+    fn succ(x: int) -> int { x + 1 }        
+    
+默认情况下,引用是不可变的:
+
+    let x = 5i;
+    let y = &x;
+    
+    *y = 5; // error: cannot assign to immutable dereference of `&`-pointer `*y`    
+
+我们可以使用`mut`关键字来创建可被改变的引用,前提是被引用的变量本身也是可被改变的.这段代码可以正常工作:
+
+    let mut x = 5i;
+    let y = &mut x;    
+    
+而这段则不行:
+
+    let x = 5i;
+    let y = &mut x; // error: cannot borrow immutable local variable `x` as mutable
+
+不可变对象的指针可以存在别名:
+
+    let x = 5i;
+    let y = &x;
+    let z = &x;
+
+而可变对象则不行:
+
+    let mut x = 5i;
+    let y = &mut x;
+    let z = &mut x; // error: cannot borrow `x` as mutable more than once at a time   
+
+ 尽管它很安全,引用在运行时的实现其实如C程序中的普通指针一样.完全没有增加任何运行时负担,所有的安全性检测都是在编译期完成的. 为此提供安全性检测的理论最初被称为"region pointers".而它逐渐演化成了我们今天称之为生存期的概念.
+ 
+下面是一个简单的解释,你认为以下代码通过编译吗?
+
+    fn main() {
+        println!("{}", x);
+        let x = 5;
+    } 
+ 
+ 显然不能.因为名字`x`只在其被声明到它离开作用域的这段时间内是有效的.所以你知道这段代码会产生错误.我们将变量的有效期称为生存期.让我们看一个复杂一点的例子:
+ 
+     fn main() {
+        let x = &mut 5i;
+    
+        if *x < 10 {
+            let y = &x;
+    
+            println!("Oh no: {}", y);
+            return;
+        }
+    
+        *x -= 1;
+    
+        println!("Oh no: {}", x);
+    }    
+    
+我们在`if`语句块中借用了`x`.编译器会检测到这个借用在我们改变`x`的时候已经离开了作用域,所以让我们通过编译.但下面的代码则无法通过:
+
+    fn main() {
+        let x = &mut 5i;
+    
+        if *x < 10 {
+            let y = &x;
+            *x -= 1;
+    
+            println!("Oh no: {}", y);
+            return;
+        }
+    
+        *x -= 1;
+    
+        println!("Oh no: {}", x);
+    }     
+    
+编译器发出以下抱怨:
+
+    test.rs:5:8: 5:10 error: cannot assign to `*x` because it is borrowed
+    test.rs:5         *x -= 1;
+                      ^~
+    test.rs:4:16: 4:18 note: borrow of `*x` occurs here
+    test.rs:4         let y = &x;
+                              ^~     
+                              
+如你能猜到的,这种检测对人来说都是相当复杂的更不用说对机器了.如果你想对生存期的细节有更多的了解请参考[guide devoted to references and lifetimes](http://doc.rust-lang.org/0.12.0/guide-lifetimes.html).
+
+####2.1 最佳实践
+
+优先考虑在栈而不是堆上分配对象.只要可能我们都应该使用对栈上对象的引用.这样默认使用的指针都是引用类型,除非你有特殊的理由要使用其它类型的指针.
+
+当你需要的只是指针而不需要获得所有权时请使用指针.引用只是借用所有权,当你不需要获得所有权的情况下它显然是更好的选择.也就是说我们应该这样写:
+
+    fn succ(x: &int) -> int { *x + 1 }
+
+而不是
+
+    fn succ(x: Box<int>) -> int { *x + 1 }
+    
+作为推论,引用允许接受更多的指针类型,这使得你不需要为接受不同指针类型实现不同的函数版本.也就是我们应该这样写:
+
+    fn succ(x: &int) -> int { *x + 1 }    
+    
+而不是:
+
+    fn box_succ(x: Box<int>) -> int { *x + 1 }
+    
+    fn rc_succ(x: std::rc::Rc<int>) -> int { *x + 1 }
