@@ -5,9 +5,9 @@ enum StringResult {
 
 fn respond(greeting: &str) -> StringResult {
     if greeting == "Hello" {
-        StringResult.StringOK("Good morning!".to_string())
+        StringResult::StringOK("Good morning!".to_string())
     } else {
-        StringResult.ErrorReason("I didn't understand you!".to_string())
+        StringResult::ErrorReason("I didn't understand you!".to_string())
     }
 }
 
