@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Traits</title>
+
+    <link rel="stylesheet" type="text/css" href="rust-book.css">
+
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="nav">
+                <button id="toggle-nav">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </button>
+              </div>
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='README.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='basic.html'><b>2.</b> I: The Basics</a>
+<ul class='section'>
+<li><a href='installing-rust.html'><b>2.1.</b> Installing Rust</a>
+</li>
+<li><a href='hello-world.html'><b>2.2.</b> Hello, world!</a>
+</li>
+<li><a href='hello-cargo.html'><b>2.3.</b> Hello, Cargo!</a>
+</li>
+<li><a href='variable-bindings.html'><b>2.4.</b> Variable Bindings</a>
+</li>
+<li><a href='if.html'><b>2.5.</b> If</a>
+</li>
+<li><a href='functions.html'><b>2.6.</b> Functions</a>
+</li>
+<li><a href='comments.html'><b>2.7.</b> Comments</a>
+</li>
+<li><a href='compound-data-types.html'><b>2.8.</b> Compound Data Types</a>
+</li>
+<li><a href='match.html'><b>2.9.</b> Match</a>
+</li>
+<li><a href='looping.html'><b>2.10.</b> Looping</a>
+</li>
+<li><a href='strings.html'><b>2.11.</b> Strings</a>
+</li>
+<li><a href='arrays-vectors-and-slices.html'><b>2.12.</b> Arrays, Vectors, and Slices</a>
+</li>
+<li><a href='standard-input.html'><b>2.13.</b> Standard Input</a>
+</li>
+<li><a href='guessing-game.html'><b>2.14.</b> Guessing Game</a>
+</li>
+</ul>
+</li>
+<li><a href='intermediate.html'><b>3.</b> II: Intermediate Rust</a>
+<ul class='section'>
+<li><a href='more-strings.html'><b>3.1.</b> More Strings</a>
+</li>
+<li><a href='crates-and-modules.html'><b>3.2.</b> Crates and Modules</a>
+</li>
+<li><a href='testing.html'><b>3.3.</b> Testing</a>
+</li>
+<li><a href='pointers.html'><b>3.4.</b> Pointers</a>
+</li>
+<li><a href='ownership.html'><b>3.5.</b> Ownership</a>
+</li>
+<li><a href='patterns.html'><b>3.6.</b> Patterns</a>
+</li>
+<li><a href='method-syntax.html'><b>3.7.</b> Method Syntax</a>
+</li>
+<li><a href='closures.html'><b>3.8.</b> Closures</a>
+</li>
+<li><a href='iterators.html'><b>3.9.</b> Iterators</a>
+</li>
+<li><a href='generics.html'><b>3.10.</b> Generics</a>
+</li>
+<li><a href='traits.html'><b>3.11.</b> Traits</a>
+</li>
+<li><a href='threads.html'><b>3.12.</b> Threads</a>
+</li>
+<li><a href='error-handling.html'><b>3.13.</b> Error Handling</a>
+</li>
+<li><a href='documentation.html'><b>3.14.</b> Documentation</a>
+</li>
+</ul>
+</li>
+<li><a href='advanced.html'><b>4.</b> III: Advanced Topics</a>
+<ul class='section'>
+<li><a href='ffi.html'><b>4.1.</b> FFI</a>
+</li>
+<li><a href='unsafe.html'><b>4.2.</b> Unsafe Code</a>
+</li>
+<li><a href='macros.html'><b>4.3.</b> Macros</a>
+</li>
+<li><a href='plugins.html'><b>4.4.</b> Compiler Plugins</a>
+</li>
+</ul>
+</li>
+<li><a href='conclusion.html'><b>5.</b> Conclusion</a>
+</li>
+</ul>
+</div>
+<div id='page-wrapper'>
+<div id='page'>
+
+
+    <h1 class="title">Traits</h1>
+    <p>Do you remember the <code>impl</code> keyword, used to call a function with method
+syntax?</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Circle</span> {
+    <span class='ident'>x</span>: <span class='ident'>f64</span>,
+    <span class='ident'>y</span>: <span class='ident'>f64</span>,
+    <span class='ident'>radius</span>: <span class='ident'>f64</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>Circle</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+        <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span> <span class='op'>*</span> (<span class='self'>self</span>.<span class='ident'>radius</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>radius</span>)
+    }
+}
+</pre>
+
+<p>Traits are similar, except that we define a trait with just the method
+signature, then implement the trait for that struct. Like this:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Circle</span> {
+    <span class='ident'>x</span>: <span class='ident'>f64</span>,
+    <span class='ident'>y</span>: <span class='ident'>f64</span>,
+    <span class='ident'>radius</span>: <span class='ident'>f64</span>,
+}
+
+<span class='kw'>trait</span> <span class='ident'>HasArea</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>;
+}
+
+<span class='kw'>impl</span> <span class='ident'>HasArea</span> <span class='kw'>for</span> <span class='ident'>Circle</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+        <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span> <span class='op'>*</span> (<span class='self'>self</span>.<span class='ident'>radius</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>radius</span>)
+    }
+}
+</pre>
+
+<p>As you can see, the <code>trait</code> block looks very similar to the <code>impl</code> block,
+but we don&#39;t define a body, just a type signature. When we <code>impl</code> a trait,
+we use <code>impl Trait for Item</code>, rather than just <code>impl Item</code>.</p>
+
+<p>So what&#39;s the big deal? Remember the error we were getting with our generic
+<code>inverse</code> function?</p>
+
+<pre><code class="language-text">error: binary operation `==` cannot be applied to type `T`
+</code></pre>
+
+<p>We can use traits to constrain our generics. Consider this function, which
+does not compile, and gives us a similar error:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>print_area</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='ident'>T</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;This shape has an area of {}&quot;</span>, <span class='ident'>shape</span>.<span class='ident'>area</span>());
+}
+</pre>
+
+<p>Rust complains:</p>
+
+<pre><code class="language-text">error: type `T` does not implement any method in scope named `area`
+</code></pre>
+
+<p>Because <code>T</code> can be any type, we can&#39;t be sure that it implements the <code>area</code>
+method. But we can add a <em>trait constraint</em> to our generic <code>T</code>, ensuring
+that it does:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>print_area</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>HasArea</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='ident'>T</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;This shape has an area of {}&quot;</span>, <span class='ident'>shape</span>.<span class='ident'>area</span>());
+}
+</pre>
+
+<p>The syntax <code>&lt;T: HasArea&gt;</code> means <code>any type that implements the HasArea trait</code>.
+Because traits define function type signatures, we can be sure that any type
+which implements <code>HasArea</code> will have an <code>.area()</code> method.</p>
+
+<p>Here&#39;s an extended example of how this works:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>trait</span> <span class='ident'>HasArea</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>;
+}
+
+<span class='kw'>struct</span> <span class='ident'>Circle</span> {
+    <span class='ident'>x</span>: <span class='ident'>f64</span>,
+    <span class='ident'>y</span>: <span class='ident'>f64</span>,
+    <span class='ident'>radius</span>: <span class='ident'>f64</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>HasArea</span> <span class='kw'>for</span> <span class='ident'>Circle</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+        <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span> <span class='op'>*</span> (<span class='self'>self</span>.<span class='ident'>radius</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>radius</span>)
+    }
+}
+
+<span class='kw'>struct</span> <span class='ident'>Square</span> {
+    <span class='ident'>x</span>: <span class='ident'>f64</span>,
+    <span class='ident'>y</span>: <span class='ident'>f64</span>,
+    <span class='ident'>side</span>: <span class='ident'>f64</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>HasArea</span> <span class='kw'>for</span> <span class='ident'>Square</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+        <span class='self'>self</span>.<span class='ident'>side</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>side</span>
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>print_area</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>HasArea</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='ident'>T</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;This shape has an area of {}&quot;</span>, <span class='ident'>shape</span>.<span class='ident'>area</span>());
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Circle</span> {
+        <span class='ident'>x</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>y</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>radius</span>: <span class='number'>1.0f64</span>,
+    };
+
+    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Square</span> {
+        <span class='ident'>x</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>y</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>side</span>: <span class='number'>1.0f64</span>,
+    };
+
+    <span class='ident'>print_area</span>(<span class='ident'>c</span>);
+    <span class='ident'>print_area</span>(<span class='ident'>s</span>);
+}
+</pre>
+
+<p>This program outputs:</p>
+
+<pre><code class="language-text">This shape has an area of 3.141593
+This shape has an area of 1
+</code></pre>
+
+<p>As you can see, <code>print_area</code> is now generic, but also ensures that we
+have passed in the correct types. If we pass in an incorrect type:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='ident'>print_area</span>(<span class='number'>5</span>);
+</pre>
+
+<p>We get a compile-time error:</p>
+
+<pre><code class="language-text">error: failed to find an implementation of trait main::HasArea for int
+</code></pre>
+
+<p>So far, we&#39;ve only added trait implementations to structs, but you can
+implement a trait for any type. So technically, we <em>could</em> implement
+<code>HasArea</code> for <code>i32</code>:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>trait</span> <span class='ident'>HasArea</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>;
+}
+
+<span class='kw'>impl</span> <span class='ident'>HasArea</span> <span class='kw'>for</span> <span class='ident'>i32</span> {
+    <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;this is silly&quot;</span>);
+
+        <span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='ident'>f64</span>
+    }
+}
+
+<span class='number'>5</span>.<span class='ident'>area</span>();
+</pre>
+
+<p>It is considered poor style to implement methods on such primitive types, even
+though it is possible.</p>
+
+<p>This may seem like the Wild West, but there are two other restrictions around
+implementing traits that prevent this from getting out of hand. First, traits
+must be <code>use</code>d in any scope where you wish to use the trait&#39;s method. So for
+example, this does not work:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>mod</span> <span class='ident'>shapes</span> {
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>;
+
+    <span class='kw'>trait</span> <span class='ident'>HasArea</span> {
+        <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>;
+    }
+
+    <span class='kw'>struct</span> <span class='ident'>Circle</span> {
+        <span class='ident'>x</span>: <span class='ident'>f64</span>,
+        <span class='ident'>y</span>: <span class='ident'>f64</span>,
+        <span class='ident'>radius</span>: <span class='ident'>f64</span>,
+    }
+
+    <span class='kw'>impl</span> <span class='ident'>HasArea</span> <span class='kw'>for</span> <span class='ident'>Circle</span> {
+        <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+            <span class='ident'>consts</span>::<span class='ident'>PI</span> <span class='op'>*</span> (<span class='self'>self</span>.<span class='ident'>radius</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>radius</span>)
+        }
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>shapes</span>::<span class='ident'>Circle</span> {
+        <span class='ident'>x</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>y</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>radius</span>: <span class='number'>1.0f64</span>,
+    };
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>c</span>.<span class='ident'>area</span>());
+}
+</pre>
+
+<p>Now that we&#39;ve moved the structs and traits into their own module, we get an
+error:</p>
+
+<pre><code class="language-text">error: type `shapes::Circle` does not implement any method in scope named `area`
+</code></pre>
+
+<p>If we add a <code>use</code> line right above <code>main</code> and make the right things public,
+everything is fine:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>shapes</span>::<span class='ident'>HasArea</span>;
+
+<span class='kw'>mod</span> <span class='ident'>shapes</span> {
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>;
+
+    <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>HasArea</span> {
+        <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>;
+    }
+
+    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Circle</span> {
+        <span class='kw'>pub</span> <span class='ident'>x</span>: <span class='ident'>f64</span>,
+        <span class='kw'>pub</span> <span class='ident'>y</span>: <span class='ident'>f64</span>,
+        <span class='kw'>pub</span> <span class='ident'>radius</span>: <span class='ident'>f64</span>,
+    }
+
+    <span class='kw'>impl</span> <span class='ident'>HasArea</span> <span class='kw'>for</span> <span class='ident'>Circle</span> {
+        <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+            <span class='ident'>consts</span>::<span class='ident'>PI</span> <span class='op'>*</span> (<span class='self'>self</span>.<span class='ident'>radius</span> <span class='op'>*</span> <span class='self'>self</span>.<span class='ident'>radius</span>)
+        }
+    }
+}
+
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>shapes</span>::<span class='ident'>Circle</span> {
+        <span class='ident'>x</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>y</span>: <span class='number'>0.0f64</span>,
+        <span class='ident'>radius</span>: <span class='number'>1.0f64</span>,
+    };
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>c</span>.<span class='ident'>area</span>());
+}
+</pre>
+
+<p>This means that even if someone does something bad like add methods to <code>int</code>,
+it won&#39;t affect you, unless you <code>use</code> that trait.</p>
+
+<p>There&#39;s one more restriction on implementing traits. Either the trait or the
+type you&#39;re writing the <code>impl</code> for must be inside your crate. So, we could
+implement the <code>HasArea</code> type for <code>i32</code>, because <code>HasArea</code> is in our crate.  But
+if we tried to implement <code>Float</code>, a trait provided by Rust, for <code>i32</code>, we could
+not, because both the trait and the type aren&#39;t in our crate.</p>
+
+<p>One last thing about traits: generic functions with a trait bound use
+<em>monomorphization</em> (<em>mono</em>: one, <em>morph</em>: form), so they are statically
+dispatched. What&#39;s that mean? Well, let&#39;s take a look at <code>print_area</code> again:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>print_area</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>HasArea</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='ident'>T</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;This shape has an area of {}&quot;</span>, <span class='ident'>shape</span>.<span class='ident'>area</span>());
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Circle</span> { ... };
+
+    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Square</span> { ... };
+
+    <span class='ident'>print_area</span>(<span class='ident'>c</span>);
+    <span class='ident'>print_area</span>(<span class='ident'>s</span>);
+}
+</pre>
+
+<p>When we use this trait with <code>Circle</code> and <code>Square</code>, Rust ends up generating
+two different functions with the concrete type, and replacing the call sites with
+calls to the concrete implementations. In other words, you get something like
+this:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>__print_area_circle</span>(<span class='ident'>shape</span>: <span class='ident'>Circle</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;This shape has an area of {}&quot;</span>, <span class='ident'>shape</span>.<span class='ident'>area</span>());
+}
+
+<span class='kw'>fn</span> <span class='ident'>__print_area_square</span>(<span class='ident'>shape</span>: <span class='ident'>Square</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;This shape has an area of {}&quot;</span>, <span class='ident'>shape</span>.<span class='ident'>area</span>());
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>Circle</span> { ... };
+
+    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Square</span> { ... };
+
+    <span class='ident'>__print_area_circle</span>(<span class='ident'>c</span>);
+    <span class='ident'>__print_area_square</span>(<span class='ident'>s</span>);
+}
+</pre>
+
+<p>The names don&#39;t actually change to this, it&#39;s just for illustration. But
+as you can see, there&#39;s no overhead of deciding which version to call here,
+hence <em>statically dispatched</em>. The downside is that we have two copies of
+the same function, so our binary is a little bit larger.</p>
+
+<h2 id="our-inverse-example" class='section-header'><a
+                           href="#our-inverse-example">Our <code>inverse</code> Example</a></h2>
+<p>Back in <a href="generics.html">Generics</a>, we were trying to write code like this:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>inverse</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>x</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
+    <span class='kw'>if</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='number'>0.0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;x cannot be zero!&quot;</span>.<span class='ident'>to_string</span>()); }
+
+    <span class='prelude-val'>Ok</span>(<span class='number'>1.0</span> <span class='op'>/</span> <span class='ident'>x</span>)
+}
+</pre>
+
+<p>If we try to compile it, we get this error:</p>
+
+<pre><code class="language-text">error: binary operation `==` cannot be applied to type `T`
+</code></pre>
+
+<p>This is because <code>T</code> is too generic: we don&#39;t know if a random <code>T</code> can be
+compared. For that, we can use trait bounds. It doesn&#39;t quite work, but try
+this:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>inverse</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>PartialEq</span><span class='op'>&gt;</span>(<span class='ident'>x</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
+    <span class='kw'>if</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='number'>0.0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;x cannot be zero!&quot;</span>.<span class='ident'>to_string</span>()); }
+
+    <span class='prelude-val'>Ok</span>(<span class='number'>1.0</span> <span class='op'>/</span> <span class='ident'>x</span>)
+}
+</pre>
+
+<p>You should get this error:</p>
+
+<pre><code class="language-text">error: mismatched types:
+ expected `T`,
+    found `_`
+(expected type parameter,
+    found floating-point variable)
+</code></pre>
+
+<p>So this won&#39;t work. While our <code>T</code> is <code>PartialEq</code>, we expected to have another <code>T</code>,
+but instead, we found a floating-point variable. We need a different bound. <code>Float</code>
+to the rescue:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::<span class='ident'>Float</span>;
+
+<span class='kw'>fn</span> <span class='ident'>inverse</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Float</span><span class='op'>&gt;</span>(<span class='ident'>x</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
+    <span class='kw'>if</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='ident'>Float</span>::<span class='ident'>zero</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;x cannot be zero!&quot;</span>.<span class='ident'>to_string</span>()) }
+
+    <span class='kw'>let</span> <span class='ident'>one</span>: <span class='ident'>T</span> <span class='op'>=</span> <span class='ident'>Float</span>::<span class='ident'>one</span>();
+    <span class='prelude-val'>Ok</span>(<span class='ident'>one</span> <span class='op'>/</span> <span class='ident'>x</span>)
+}
+</pre>
+
+<p>We&#39;ve had to replace our generic <code>0.0</code> and <code>1.0</code> with the appropriate methods
+from the <code>Float</code> trait. Both <code>f32</code> and <code>f64</code> implement <code>Float</code>, so our function
+works just fine:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;the inverse of {} is {:?}&quot;</span>, <span class='number'>2.0f32</span>, <span class='ident'>inverse</span>(<span class='number'>2.0f32</span>));
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;the inverse of {} is {:?}&quot;</span>, <span class='number'>2.0f64</span>, <span class='ident'>inverse</span>(<span class='number'>2.0f64</span>));
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;the inverse of {} is {:?}&quot;</span>, <span class='number'>0.0f32</span>, <span class='ident'>inverse</span>(<span class='number'>0.0f32</span>));
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;the inverse of {} is {:?}&quot;</span>, <span class='number'>0.0f64</span>, <span class='ident'>inverse</span>(<span class='number'>0.0f64</span>));
+</pre>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "";
+    </script>
+    
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function(event) {
+  document.getElementById("toggle-nav").onclick = toggleNav;
+  function toggleNav() {
+    var toc = document.getElementById("toc");
+    var pagewrapper = document.getElementById("page-wrapper");
+    toggleClass(toc, "mobile-hidden");
+    toggleClass(pagewrapper, "mobile-hidden");
+  };
+
+  function toggleClass(el, className) {
+     // from http://youmightnotneedjquery.com/
+     if (el.classList) {
+       el.classList.toggle(className);
+     } else {
+       var classes = el.className.split(' ');
+       var existingIndex = classes.indexOf(className);
+
+       if (existingIndex >= 0) {
+         classes.splice(existingIndex, 1);
+       } else {
+         classes.push(className);
+       }
+
+       el.className = classes.join(' ');
+     }
+  }
+});
+</script>
+</div></div>
+
+
+</body>
+</html>

@@ -26,27 +26,28 @@
 *	[26 Unsafe](#)
 *	[27 尾声](#尾声)
 
-Rust是一种系统编程语言,它关注的焦点是高级的,裸机编程(bare-metal programming):在获得低级编程语言才有的对系统的控制能力的同时获得零消耗的高级抽象机制.
+Rust是一种高级系统编程语言.系统语言意味着Rust可以完全的操控硬件设备,也就是说你可以用Rust在裸机上编写程序.高级说明Rust是一种高级语言,它提供了0开销的高级抽象机制,因为它的使用者是人而不是机器.我确实觉得Rust有点与众不同,希望你也会有同样的感觉.
 
-为了向您展示如何使用Rust编程,我们首先向你展示一个传统的"hello world!"程序.接着我向你介绍编写真实世界中Rust程序和库所用到的工具:Cargo.再后面我会介绍Rust的基本知识,展示一些简单的小程序,最后再学习更多高级的知识.
+为了向您展示如何使用Rust编程,我们首先向你展示一个传统的"hello world!"程序.接着我将介绍用于编写真实世界中Rust程序和库所用到的工具:Cargo.之后再回来介绍Rust的基本知识,展示一些简单的小程序,最后,再学习一些更高级的知识.
 
-听着不错是吗?让我们开始吧.
+听着不错?我们开始吧!
 
 ###<span id="1 安装Rust">1 安装Rust</span>
 
-使用Rust的第一步就是在你的系统中安装Rust!有多种方式安装Rust,但最简单的方式莫过于使用`rustup`脚本了.如果你在Linux或Mac系统下你所要做的事情就是在命令行中输入以下命令:
+在使用Rust编写程序之前,你必须先在你的系统上安装Rust所需要的环境.虽然有多种方法可以达到这个目的,但最简单的就是使用rustup脚本.如果你在Linux或Mac系统下,那么你所要做的只是在命令行中输入以下命令:
 
-    $ curl -s https://static.rust-lang.org/rustup.sh | sudo sh
+   $ curl -s https://static.rust-lang.org/rustup.sh | sudo sh
+   
+   
+如果你在Windows下,请下载[ 32-bit installer](https://static.rust-lang.org/dist/rust-nightly-i686-w64-mingw32.exe)或[ 64-bit installer](https://static.rust-lang.org/dist/rust-nightly-x86_64-w64-mingw32.exe)然后点击安装.
 
-如果你在Windows下,请下载[ 32-bit installer](https://static.rust-lang.org/dist/rust-nightly-i686-w64-mingw32.exe)或[ 64-bit installer](https://static.rust-lang.org/dist/rust-nightly-x86_64-w64-mingw32.exe)然后运行.
-
-如果你不再需要Rust了可以通过以下方式将它删除:
+如果你不再需要Rust了可以通过以下方式将它移除:
 
     $ curl -s https://static.rust-lang.org/rustup.sh | sudo sh -s -- --uninstall
 
-如果你在Windows下,则再次运行你所下载的安装文件然后选择删除.
+如果你在Windows下,则再次运行安装文件然后选择删除.
 
-你可以通过再次执行脚本来将Rust更新到最新版本.
+你可以通过再次执行脚本来将Rust更新到最新版本.当前Rust的更新会非常频繁.
 
 ###<span id="2 Hello, world!">2 Hello, world!</span>
 

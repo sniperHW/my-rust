@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>The Rust Threads and Communication Guide</title>
+
+    <link rel="stylesheet" type="text/css" href="rust-book.css">
+
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="nav">
+                <button id="toggle-nav">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </button>
+              </div>
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='README.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='basic.html'><b>2.</b> I: The Basics</a>
+<ul class='section'>
+<li><a href='installing-rust.html'><b>2.1.</b> Installing Rust</a>
+</li>
+<li><a href='hello-world.html'><b>2.2.</b> Hello, world!</a>
+</li>
+<li><a href='hello-cargo.html'><b>2.3.</b> Hello, Cargo!</a>
+</li>
+<li><a href='variable-bindings.html'><b>2.4.</b> Variable Bindings</a>
+</li>
+<li><a href='if.html'><b>2.5.</b> If</a>
+</li>
+<li><a href='functions.html'><b>2.6.</b> Functions</a>
+</li>
+<li><a href='comments.html'><b>2.7.</b> Comments</a>
+</li>
+<li><a href='compound-data-types.html'><b>2.8.</b> Compound Data Types</a>
+</li>
+<li><a href='match.html'><b>2.9.</b> Match</a>
+</li>
+<li><a href='looping.html'><b>2.10.</b> Looping</a>
+</li>
+<li><a href='strings.html'><b>2.11.</b> Strings</a>
+</li>
+<li><a href='arrays-vectors-and-slices.html'><b>2.12.</b> Arrays, Vectors, and Slices</a>
+</li>
+<li><a href='standard-input.html'><b>2.13.</b> Standard Input</a>
+</li>
+<li><a href='guessing-game.html'><b>2.14.</b> Guessing Game</a>
+</li>
+</ul>
+</li>
+<li><a href='intermediate.html'><b>3.</b> II: Intermediate Rust</a>
+<ul class='section'>
+<li><a href='more-strings.html'><b>3.1.</b> More Strings</a>
+</li>
+<li><a href='crates-and-modules.html'><b>3.2.</b> Crates and Modules</a>
+</li>
+<li><a href='testing.html'><b>3.3.</b> Testing</a>
+</li>
+<li><a href='pointers.html'><b>3.4.</b> Pointers</a>
+</li>
+<li><a href='ownership.html'><b>3.5.</b> Ownership</a>
+</li>
+<li><a href='patterns.html'><b>3.6.</b> Patterns</a>
+</li>
+<li><a href='method-syntax.html'><b>3.7.</b> Method Syntax</a>
+</li>
+<li><a href='closures.html'><b>3.8.</b> Closures</a>
+</li>
+<li><a href='iterators.html'><b>3.9.</b> Iterators</a>
+</li>
+<li><a href='generics.html'><b>3.10.</b> Generics</a>
+</li>
+<li><a href='traits.html'><b>3.11.</b> Traits</a>
+</li>
+<li><a href='threads.html'><b>3.12.</b> Threads</a>
+</li>
+<li><a href='error-handling.html'><b>3.13.</b> Error Handling</a>
+</li>
+<li><a href='documentation.html'><b>3.14.</b> Documentation</a>
+</li>
+</ul>
+</li>
+<li><a href='advanced.html'><b>4.</b> III: Advanced Topics</a>
+<ul class='section'>
+<li><a href='ffi.html'><b>4.1.</b> FFI</a>
+</li>
+<li><a href='unsafe.html'><b>4.2.</b> Unsafe Code</a>
+</li>
+<li><a href='macros.html'><b>4.3.</b> Macros</a>
+</li>
+<li><a href='plugins.html'><b>4.4.</b> Compiler Plugins</a>
+</li>
+</ul>
+</li>
+<li><a href='conclusion.html'><b>5.</b> Conclusion</a>
+</li>
+</ul>
+</div>
+<div id='page-wrapper'>
+<div id='page'>
+
+
+    <h1 class="title">The Rust Threads and Communication Guide</h1>
+    <p><strong>NOTE</strong> This guide is badly out of date and needs to be rewritten.</p>
+
+<h1 id="introduction" class='section-header'><a
+                           href="#introduction">Introduction</a></h1>
+<p>Rust provides safe concurrent abstractions through a number of core library
+primitives. This guide will describe the concurrency model in Rust, how it
+relates to the Rust type system, and introduce the fundamental library
+abstractions for constructing concurrent programs.</p>
+
+<p>Threads provide failure isolation and recovery. When a fatal error occurs in Rust
+code as a result of an explicit call to <code>panic!()</code>, an assertion failure, or
+another invalid operation, the runtime system destroys the entire thread. Unlike
+in languages such as Java and C++, there is no way to <code>catch</code> an exception.
+Instead, threads may monitor each other to see if they panic.</p>
+
+<p>Threads use Rust&#39;s type system to provide strong memory safety guarantees.  In
+particular, the type system guarantees that threads cannot induce a data race
+from shared mutable state.</p>
+
+<h1 id="basics" class='section-header'><a
+                           href="#basics">Basics</a></h1>
+<p>At its simplest, creating a thread is a matter of calling the <code>spawn</code> function
+with a closure argument. <code>spawn</code> executes the closure in the new thread.</p>
+<pre id='rust-example-rendered' class='rust '>
+
+<span class='comment'>// Print something profound in a different thread using a named function</span>
+<span class='kw'>fn</span> <span class='ident'>print_message</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am running in a different thread!&quot;</span>); }
+<span class='ident'>spawn</span>(<span class='ident'>print_message</span>);
+
+<span class='comment'>// Alternatively, use a `move ||` expression instead of a named function.</span>
+<span class='comment'>// `||` expressions evaluate to an unnamed closure. The `move` keyword</span>
+<span class='comment'>// indicates that the closure should take ownership of any variables it</span>
+<span class='comment'>// touches.</span>
+<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am also running in a different thread!&quot;</span>));
+</pre>
+
+<p>In Rust, a thread is not a concept that appears in the language semantics.
+Instead, Rust&#39;s type system provides all the tools necessary to implement safe
+concurrency: particularly, ownership. The language leaves the implementation
+details to the standard library.</p>
+
+<p>The <code>spawn</code> function has the type signature: <code>fn
+spawn&lt;F:FnOnce()+Send&gt;(f: F)</code>.  This indicates that it takes as
+argument a closure (of type <code>F</code>) that it will run exactly once. This
+closure is limited to capturing <code>Send</code>-able data from its environment
+(that is, data which is deeply owned). Limiting the closure to <code>Send</code>
+ensures that <code>spawn</code> can safely move the entire closure and all its
+associated state into an entirely different thread for execution.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::<span class='ident'>Thread</span>;
+
+<span class='kw'>fn</span> <span class='ident'>generate_thread_number</span>() <span class='op'>-&gt;</span> <span class='ident'>i32</span> { <span class='number'>4</span> } <span class='comment'>// a very simple generation</span>
+
+<span class='comment'>// Generate some state locally</span>
+<span class='kw'>let</span> <span class='ident'>child_thread_number</span> <span class='op'>=</span> <span class='ident'>generate_thread_number</span>();
+
+<span class='ident'>Thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='comment'>// Capture it in the remote thread. The `move` keyword indicates</span>
+    <span class='comment'>// that this closure should move `child_thread_number` into its</span>
+    <span class='comment'>// environment, rather than capturing a reference into the</span>
+    <span class='comment'>// enclosing stack frame.</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am child number {}&quot;</span>, <span class='ident'>child_thread_number</span>);
+});
+</pre>
+
+<h2 id="communication" class='section-header'><a
+                           href="#communication">Communication</a></h2>
+<p>Now that we have spawned a new thread, it would be nice if we could communicate
+with it. For this, we use <em>channels</em>. A channel is simply a pair of endpoints:
+one for sending messages and another for receiving messages.</p>
+
+<p>The simplest way to create a channel is to use the <code>channel</code> function to create a
+<code>(Sender, Receiver)</code> pair. In Rust parlance, a <em>sender</em> is a sending endpoint
+of a channel, and a <em>receiver</em> is the receiving endpoint. Consider the following
+example of calculating two results concurrently:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::<span class='ident'>Thread</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>;
+
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>): (<span class='ident'>mpsc</span>::<span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>, <span class='ident'>mpsc</span>::<span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+
+<span class='ident'>Thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>some_expensive_computation</span>();
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>result</span>);
+});
+
+<span class='ident'>some_other_expensive_computation</span>();
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
+
+<span class='kw'>fn</span> <span class='ident'>some_expensive_computation</span>() <span class='op'>-&gt;</span> <span class='ident'>u32</span> { <span class='number'>42</span> } <span class='comment'>// very expensive ;)</span>
+<span class='kw'>fn</span> <span class='ident'>some_other_expensive_computation</span>() {}      <span class='comment'>// even more so</span>
+</pre>
+
+<p>Let&#39;s examine this example in detail. First, the <code>let</code> statement creates a
+stream for sending and receiving integers (the left-hand side of the <code>let</code>,
+<code>(tx, rx)</code>, is an example of a destructuring let: the pattern separates a tuple
+into its component parts).</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>): (<span class='ident'>mpsc</span>::<span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>, <span class='ident'>mpsc</span>::<span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+</pre>
+
+<p>The child thread will use the sender to send data to the parent thread, which will
+wait to receive the data on the receiver. The next statement spawns the child
+thread.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='ident'>Thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>some_expensive_computation</span>();
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>result</span>);
+});
+</pre>
+
+<p>Notice that the creation of the thread closure transfers <code>tx</code> to the child thread
+implicitly: the closure captures <code>tx</code> in its environment. Both <code>Sender</code> and
+<code>Receiver</code> are sendable types and may be captured into threads or otherwise
+transferred between them. In the example, the child thread runs an expensive
+computation, then sends the result over the captured channel.</p>
+
+<p>Finally, the parent continues with some other expensive computation, then waits
+for the child&#39;s result to arrive on the receiver:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='ident'>some_other_expensive_computation</span>();
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
+</pre>
+
+<p>The <code>Sender</code> and <code>Receiver</code> pair created by <code>channel</code> enables efficient
+communication between a single sender and a single receiver, but multiple
+senders cannot use a single <code>Sender</code> value, and multiple receivers cannot use a
+single <code>Receiver</code> value.  What if our example needed to compute multiple
+results across a number of threads? The following program is ill-typed:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>());
+});
+
+<span class='comment'>// ERROR! The previous spawn statement already owns the sender,</span>
+<span class='comment'>// so the compiler will not allow it to be captured again</span>
+<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>());
+});
+</pre>
+
+<p>Instead we can clone the <code>tx</code>, which allows for multiple senders.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::<span class='ident'>Thread</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>;
+
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+
+<span class='kw'>for</span> <span class='ident'>init_val</span> <span class='kw'>in</span> <span class='number'>0</span> .. <span class='number'>3</span> {
+    <span class='comment'>// Create a new channel handle to distribute to the child thread</span>
+    <span class='kw'>let</span> <span class='ident'>child_tx</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
+    <span class='ident'>Thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+        <span class='ident'>child_tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>(<span class='ident'>init_val</span>));
+    });
+}
+
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>().<span class='ident'>unwrap</span>() <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>().<span class='ident'>unwrap</span>() <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>().<span class='ident'>unwrap</span>();
+</pre>
+
+<p>Cloning a <code>Sender</code> produces a new handle to the same channel, allowing multiple
+threads to send data to a single receiver. It upgrades the channel internally in
+order to allow this functionality, which means that channels that are not
+cloned can avoid the overhead required to handle multiple senders. But this
+fact has no bearing on the channel&#39;s usage: the upgrade is transparent.</p>
+
+<p>Note that the above cloning example is somewhat contrived since you could also
+simply use three <code>Sender</code> pairs, but it serves to illustrate the point. For
+reference, written with multiple streams, it might look like the example below.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::<span class='ident'>Thread</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>;
+
+<span class='comment'>// Create a vector of ports, one for each child thread</span>
+<span class='kw'>let</span> <span class='ident'>rxs</span> <span class='op'>=</span> (<span class='number'>0</span> .. <span class='number'>3</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>:<span class='ident'>init_val</span><span class='op'>|</span> {
+    <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>mpsc</span>::<span class='ident'>channel</span>();
+    <span class='ident'>Thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+        <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>(<span class='ident'>init_val</span>));
+    });
+    <span class='ident'>rx</span>
+}).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>();
+
+<span class='comment'>// Wait on each port, accumulating the results</span>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rxs</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='kw-2'>&amp;</span>:<span class='ident'>accum</span>, <span class='ident'>rx</span><span class='op'>|</span> <span class='ident'>accum</span> <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>().<span class='ident'>unwrap</span>() );
+</pre>
+
+<h2 id="backgrounding-computations:-futures" class='section-header'><a
+                           href="#backgrounding-computations:-futures">Backgrounding computations: Futures</a></h2>
+<p>With <code>sync::Future</code>, rust has a mechanism for requesting a computation and
+getting the result later.</p>
+
+<p>The basic example below illustrates this.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Future</span>;
+
+<span class='kw'>fn</span> <span class='ident'>fib</span>(<span class='ident'>n</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
+    <span class='comment'>// lengthy computation returning an 64</span>
+    <span class='number'>12586269025</span>
+}
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>delayed_fib</span> <span class='op'>=</span> <span class='ident'>Future</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> <span class='ident'>fib</span>(<span class='number'>50</span>));
+<span class='ident'>make_a_sandwich</span>();
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;fib(50) = {}&quot;</span>, <span class='ident'>delayed_fib</span>.<span class='ident'>get</span>())
+</pre>
+
+<p>The call to <code>future::spawn</code> immediately returns a <code>future</code> object regardless of
+how long it takes to run <code>fib(50)</code>. You can then make yourself a sandwich while
+the computation of <code>fib</code> is running. The result of the execution of the method
+is obtained by calling <code>get</code> on the future. This call will block until the
+value is available (<em>i.e.</em> the computation is complete). Note that the future
+needs to be mutable so that it can save the result for next time <code>get</code> is
+called.</p>
+
+<p>Here is another example showing how futures allow you to background
+computations. The workload will be distributed on the available cores.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>partial_sum</span>(<span class='ident'>start</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>local_sum</span> <span class='op'>=</span> <span class='number'>0f64</span>;
+    <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>start</span><span class='op'>*</span><span class='number'>100000</span>, (<span class='ident'>start</span><span class='op'>+</span><span class='number'>1</span>)<span class='op'>*</span><span class='number'>100000</span>) {
+        <span class='ident'>local_sum</span> <span class='op'>+=</span> (<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>+</span> <span class='number'>1.0</span>).<span class='ident'>powf</span>(<span class='op'>-</span><span class='number'>2.0</span>);
+    }
+    <span class='ident'>local_sum</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>futures</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>200</span>, <span class='op'>|</span><span class='ident'>ind</span><span class='op'>|</span> <span class='ident'>Future</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> <span class='ident'>partial_sum</span>(<span class='ident'>ind</span>)));
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>final_res</span> <span class='op'>=</span> <span class='number'>0f64</span>;
+    <span class='kw'>for</span> <span class='ident'>ft</span> <span class='kw'>in</span> <span class='ident'>futures</span>.<span class='ident'>iter_mut</span>()  {
+        <span class='ident'>final_res</span> <span class='op'>+=</span> <span class='ident'>ft</span>.<span class='ident'>get</span>();
+    }
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;π^2/6 is not far from : {}&quot;</span>, <span class='ident'>final_res</span>);
+}
+</pre>
+
+<h2 id="sharing-without-copying:-arc" class='section-header'><a
+                           href="#sharing-without-copying:-arc">Sharing without copying: Arc</a></h2>
+<p>To share data between threads, a first approach would be to only use channel as
+we have seen previously. A copy of the data to share would then be made for
+each thread. In some cases, this would add up to a significant amount of wasted
+memory and would require copying the same data more than necessary.</p>
+
+<p>To tackle this issue, one can use an Atomically Reference Counted wrapper
+(<code>Arc</code>) as implemented in the <code>sync</code> library of Rust. With an Arc, the data
+will no longer be copied for each thread. The Arc acts as a reference to the
+shared data and only this reference is shared and cloned.</p>
+
+<p>Here is a small example showing how to use Arcs. We wish to run concurrently
+several computations on a single large vector of floats. Each thread needs the
+full vector to perform its duty.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::<span class='ident'>Float</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
+
+<span class='kw'>fn</span> <span class='ident'>pnorm</span>(<span class='ident'>nums</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>f64</span>], <span class='ident'>p</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='ident'>nums</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0.0</span>, <span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>a</span> <span class='op'>+</span> <span class='ident'>b</span>.<span class='ident'>powf</span>(<span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>f64</span>)).<span class='ident'>powf</span>(<span class='number'>1.0</span> <span class='op'>/</span> (<span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>f64</span>))
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>1000000</span>, <span class='op'>|</span>_<span class='op'>|</span> <span class='ident'>rand</span>::<span class='ident'>random</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>());
+    <span class='kw'>let</span> <span class='ident'>numbers_arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>numbers</span>);
+
+    <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>1</span>, <span class='number'>10</span>) {
+        <span class='kw'>let</span> <span class='ident'>thread_numbers</span> <span class='op'>=</span> <span class='ident'>numbers_arc</span>.<span class='ident'>clone</span>();
+
+        <span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}-norm = {}&quot;</span>, <span class='ident'>num</span>, <span class='ident'>pnorm</span>(<span class='ident'>thread_numbers</span>.<span class='ident'>as_slice</span>(), <span class='ident'>num</span>));
+        });
+    }
+}
+</pre>
+
+<p>The function <code>pnorm</code> performs a simple computation on the vector (it computes
+the sum of its items at the power given as argument and takes the inverse power
+of this value). The Arc on the vector is created by the line:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>let</span> <span class='ident'>numbers_arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>numbers</span>);
+</pre>
+
+<p>and a clone is captured for each thread via a procedure. This only copies
+the wrapper and not its contents. Within the thread&#39;s procedure, the captured
+Arc reference can be used as a shared reference to the underlying vector as
+if it were local.</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>let</span> <span class='ident'>thread_numbers</span> <span class='op'>=</span> <span class='ident'>numbers_arc</span>.<span class='ident'>clone</span>();
+<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='comment'>// Capture thread_numbers and use it as if it was the underlying vector</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}-norm = {}&quot;</span>, <span class='ident'>num</span>, <span class='ident'>pnorm</span>(<span class='ident'>thread_numbers</span>.<span class='ident'>as_slice</span>(), <span class='ident'>num</span>));
+});
+</pre>
+
+<h1 id="handling-thread-panics" class='section-header'><a
+                           href="#handling-thread-panics">Handling thread panics</a></h1>
+<p>Rust has a built-in mechanism for raising exceptions. The <code>panic!()</code> macro
+(which can also be written with an error string as an argument: <code>panic!(
+~reason)</code>) and the <code>assert!</code> construct (which effectively calls <code>panic!()</code> if a
+boolean expression is false) are both ways to raise exceptions. When a thread
+raises an exception, the thread unwinds its stack—running destructors and
+freeing memory along the way—and then exits. Unlike exceptions in C++,
+exceptions in Rust are unrecoverable within a single thread: once a thread panics,
+there is no way to &quot;catch&quot; the exception.</p>
+
+<p>While it isn&#39;t possible for a thread to recover from panicking, threads may notify
+each other if they panic. The simplest way of handling a panic is with the
+<code>try</code> function, which is similar to <code>spawn</code>, but immediately blocks and waits
+for the child thread to finish. <code>try</code> returns a value of type
+<code>Result&lt;T, Box&lt;Any + Send&gt;&gt;</code>. <code>Result</code> is an <code>enum</code> type with two variants:
+<code>Ok</code> and <code>Err</code>. In this case, because the type arguments to <code>Result</code> are <code>i32</code>
+and <code>()</code>, callers can pattern-match on a result to check whether it&#39;s an <code>Ok</code>
+result with an <code>i32</code> field (representing a successful result) or an <code>Err</code> result
+(representing termination with an error).</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>let</span> <span class='ident'>result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>i32</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>Thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
+    <span class='kw'>if</span> <span class='ident'>some_condition</span>() {
+        <span class='ident'>calculate_result</span>()
+    } <span class='kw'>else</span> {
+        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;oops!&quot;</span>);
+    }
+}).<span class='ident'>join</span>();
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
+</pre>
+
+<p>Unlike <code>spawn</code>, the function spawned using <code>try</code> may return a value, which
+<code>try</code> will dutifully propagate back to the caller in a <a href="../std/result/"><code>Result</code></a> enum. If the
+child thread terminates successfully, <code>try</code> will return an <code>Ok</code> result; if the
+child thread panics, <code>try</code> will return an <code>Error</code> result.</p>
+
+<blockquote>
+<p><em>Note:</em> A panicked thread does not currently produce a useful error
+value (<code>try</code> always returns <code>Err(())</code>). In the
+future, it may be possible for threads to intercept the value passed to
+<code>panic!()</code>.</p>
+</blockquote>
+
+<p>But not all panics are created equal. In some cases you might need to abort
+the entire program (perhaps you&#39;re writing an assert which, if it trips,
+indicates an unrecoverable logic error); in other cases you might want to
+contain the panic at a certain boundary (perhaps a small piece of input from
+the outside world, which you happen to be processing in parallel, is malformed
+such that the processing thread cannot proceed).</p>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "";
+    </script>
+    
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function(event) {
+  document.getElementById("toggle-nav").onclick = toggleNav;
+  function toggleNav() {
+    var toc = document.getElementById("toc");
+    var pagewrapper = document.getElementById("page-wrapper");
+    toggleClass(toc, "mobile-hidden");
+    toggleClass(pagewrapper, "mobile-hidden");
+  };
+
+  function toggleClass(el, className) {
+     // from http://youmightnotneedjquery.com/
+     if (el.classList) {
+       el.classList.toggle(className);
+     } else {
+       var classes = el.className.split(' ');
+       var existingIndex = classes.indexOf(className);
+
+       if (existingIndex >= 0) {
+         classes.splice(existingIndex, 1);
+       } else {
+         classes.push(className);
+       }
+
+       el.className = classes.join(' ');
+     }
+  }
+});
+</script>
+</div></div>
+
+
+</body>
+</html>

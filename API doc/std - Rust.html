@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)http://doc.rust-lang.org/std/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `std` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, std">
+
+    <title>std - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="./main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href="http://doc.rust-lang.org/std/"><img src="./rust-logo-128x128-blk-v2.png" alt="" width="100"></a>
+        <p class="location"></p>
+    <div class="block crate"><h2>Crates</h2><a href="./alloc/index.html" title="The Rust core allocation library" class="crate">alloc</a><a href="http://doc.rust-lang.org/arena/index.html" title="The arena, a fast but limited type of allocator." class="crate">arena</a><a href="http://doc.rust-lang.org/collections/index.html" title="Collection types." class="crate">collections</a><a href="http://doc.rust-lang.org/core/index.html" title="The Rust Core Library" class="crate">core</a><a href="http://doc.rust-lang.org/flate/index.html" title="Simple DEFLATE-based compression. This is a wrapper around the `miniz` library, which is a one-file pure-C implementation of zlib." class="crate">flate</a><a href="http://doc.rust-lang.org/fmt_macros/index.html" title="Macro support for format strings" class="crate">fmt_macros</a><a href="http://doc.rust-lang.org/graphviz/index.html" title="Generate files suitable for use with Graphviz" class="crate">graphviz</a><a href="http://doc.rust-lang.org/libc/index.html" title="Bindings for the C standard library and other platform libraries" class="crate">libc</a><a href="http://doc.rust-lang.org/rand/index.html" title="Interface to random number generators in Rust." class="crate">rand</a><a href="http://doc.rust-lang.org/rbml/index.html" title="Really Bad Markup Language (rbml) is a temporary measure until we migrate the rust object metadata to a better serialization format. It is not intended to be used by users." class="crate">rbml</a><a href="http://doc.rust-lang.org/rustc/index.html" title="The Rust compiler." class="crate">rustc</a><a href="http://doc.rust-lang.org/rustc_back/index.html" title="Some stuff used by rustc that doesn&#39;t have many dependencies" class="crate">rustc_back</a><a href="http://doc.rust-lang.org/rustc_bitflags/index.html" title="A typesafe bitmask flag generator." class="crate">rustc_bitflags</a><a href="http://doc.rust-lang.org/rustc_borrowck/index.html" title="" class="crate">rustc_borrowck</a><a href="http://doc.rust-lang.org/rustc_driver/index.html" title="The Rust compiler." class="crate">rustc_driver</a><a href="http://doc.rust-lang.org/rustc_llvm/index.html" title="" class="crate">rustc_llvm</a><a href="http://doc.rust-lang.org/rustc_privacy/index.html" title="" class="crate">rustc_privacy</a><a href="http://doc.rust-lang.org/rustc_resolve/index.html" title="" class="crate">rustc_resolve</a><a href="http://doc.rust-lang.org/rustc_trans/index.html" title="The Rust compiler." class="crate">rustc_trans</a><a href="http://doc.rust-lang.org/rustc_typeck/index.html" title="typeck.rs, an introduction" class="crate">rustc_typeck</a><a href="http://doc.rust-lang.org/rustdoc/index.html" title="" class="crate">rustdoc</a><a href="http://doc.rust-lang.org/serialize/index.html" title="Support code for encoding and decoding types." class="crate">serialize</a><a href="./std - Rust.html" title="The Rust Standard Library" class="crate current">std</a><a href="http://doc.rust-lang.org/syntax/index.html" title="The Rust parser and macro expander." class="crate">syntax</a><a href="http://doc.rust-lang.org/term/index.html" title="Terminal formatting library." class="crate">term</a><a href="http://doc.rust-lang.org/test/index.html" title="Support code for rustc&#39;s built in unit-test and micro-benchmarking framework." class="crate">test</a><a href="http://doc.rust-lang.org/unicode/index.html" title="The Unicode Library" class="crate">unicode</a></div></section>
+
+    <nav class="sub">
+        <form class="search-form">
+            <div class="search-container">
+                <input class="search-input" name="search" autocomplete="off" placeholder="Click or press &#39;S&#39; to search, &#39;?&#39; for more options..." type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id="main" class="content mod">
+<h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">std</a><wbr><a class="stability Stable" title="">Stable</a></span><span class="out-of-band"><a href="http://doc.rust-lang.org/std/stability.html">[stability]</a> <span id="render-detail">
+            <a id="collapse-all" href="http://doc.rust-lang.org/std/index.html#">[-]
+            </a>&nbsp;<a id="expand-all" href="http://doc.rust-lang.org/std/index.html#">[+]</a>
+        </span><a id="src-0" href="http://doc.rust-lang.org/src/std/lib.rs.html#11-306">[src]</a></span></h1>
+<div class="toggle-wrapper"><a href="javascript:void(0)" class="collapse-toggle">[<span class="inner">-</span>]<span class="toggle-label" style="display: none;">&nbsp;Expand&nbsp;description</span></a></div><div class="docblock">
+<h1 id="the-rust-standard-library" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#the-rust-standard-library">The Rust Standard Library</a></h1>
+<p>The Rust Standard Library provides the essential runtime
+functionality for building portable Rust software.
+It is linked to all Rust crates by default.</p>
+
+<h2 id="intrinsic-types-and-operations" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#intrinsic-types-and-operations">Intrinsic types and operations</a></h2>
+<p>The <a href="http://doc.rust-lang.org/std/ptr/"><code>ptr</code></a> and <a href="http://doc.rust-lang.org/std/mem/"><code>mem</code></a>
+modules deal with unsafe pointers and memory manipulation.
+<a href="http://doc.rust-lang.org/std/marker/"><code>marker</code></a> defines the special built-in traits,
+and <a href="http://doc.rust-lang.org/std/raw/"><code>raw</code></a> the runtime representation of Rust types.
+These are some of the lowest-level building blocks in Rust.</p>
+
+<h2 id="math-on-primitive-types-and-math-traits" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#math-on-primitive-types-and-math-traits">Math on primitive types and math traits</a></h2>
+<p>Although basic operations on primitive types are implemented
+directly by the compiler, the standard library additionally
+defines many common operations through traits defined in
+mod <a href="http://doc.rust-lang.org/std/num/"><code>num</code></a>.</p>
+
+<h2 id="pervasive-types" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#pervasive-types">Pervasive types</a></h2>
+<p>The <a href="http://doc.rust-lang.org/std/option/"><code>option</code></a> and <a href="http://doc.rust-lang.org/std/result/"><code>result</code></a>
+modules define optional and error-handling types, <code>Option</code> and <code>Result</code>.
+<a href="http://doc.rust-lang.org/std/iter/"><code>iter</code></a> defines Rust's iterator protocol
+along with a wide variety of iterators.
+<a href="http://doc.rust-lang.org/std/cell/"><code>Cell</code> and <code>RefCell</code></a> are for creating types that
+manage their own mutability.</p>
+
+<h2 id="vectors,-slices-and-strings" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#vectors,-slices-and-strings">Vectors, slices and strings</a></h2>
+<p>The common container type, <code>Vec</code>, a growable vector backed by an
+array, lives in the <a href="http://doc.rust-lang.org/std/vec/"><code>vec</code></a> module. References to
+arrays, <code>&amp;[T]</code>, more commonly called "slices", are built-in types
+for which the <a href="http://doc.rust-lang.org/std/slice/"><code>slice</code></a> module defines many
+methods.</p>
+
+<p><code>&amp;str</code>, a UTF-8 string, is a built-in type, and the standard library
+defines methods for it on a variety of traits in the
+<a href="http://doc.rust-lang.org/std/str/"><code>str</code></a> module. Rust strings are immutable;
+use the <code>String</code> type defined in <a href="http://doc.rust-lang.org/std/string/"><code>string</code></a>
+for a mutable string builder.</p>
+
+<p>For converting to strings use the <a href="http://doc.rust-lang.org/std/fmt/"><code>format!</code></a>
+macro, and for converting from strings use the
+<a href="http://doc.rust-lang.org/std/str/trait.FromStr.html"><code>FromStr</code></a> trait.</p>
+
+<h2 id="platform-abstractions" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#platform-abstractions">Platform abstractions</a></h2>
+<p>Besides basic data types, the standard library is largely concerned
+with abstracting over differences in common platforms, most notably
+Windows and Unix derivatives. The <a href="http://doc.rust-lang.org/std/os/"><code>os</code></a> module
+provides a number of basic functions for interacting with the
+operating environment, including program arguments, environment
+variables, and directory navigation. The <a href="http://doc.rust-lang.org/std/path/"><code>path</code></a>
+module encapsulates the platform-specific rules for dealing
+with file paths.</p>
+
+<p><code>std</code> also includes modules for interoperating with the
+C language: <a href="http://doc.rust-lang.org/std/c_str/"><code>c_str</code></a> and
+<a href="http://doc.rust-lang.org/std/c_vec/"><code>c_vec</code></a>.</p>
+
+<h2 id="concurrency,-i/o,-and-the-runtime" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#concurrency,-i/o,-and-the-runtime">Concurrency, I/O, and the runtime</a></h2>
+<p>The <a href="http://doc.rust-lang.org/std/thread/"><code>thread</code></a> module contains Rust's threading abstractions,
+while <a href="http://doc.rust-lang.org/std/comm/"><code>comm</code></a> contains the channel types for message
+passing. <a href="http://doc.rust-lang.org/std/sync/"><code>sync</code></a> contains further, primitive, shared
+memory types, including <a href="http://doc.rust-lang.org/std/sync/atomic/"><code>atomic</code></a>.</p>
+
+<p>Common types of I/O, including files, TCP, UDP, pipes, Unix domain sockets,
+timers, and process spawning, are defined in the
+<a href="http://doc.rust-lang.org/std/old_io/"><code>old_io</code></a> module.</p>
+
+<p>Rust's I/O and concurrency depends on a small runtime interface
+that lives, along with its support code, in mod <a href="http://doc.rust-lang.org/std/rt/"><code>rt</code></a>.
+While a notable part of the standard library's architecture, this
+module is not intended for public use.</p>
+
+<h2 id="the-rust-prelude-and-macros" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#the-rust-prelude-and-macros">The Rust prelude and macros</a></h2>
+<p>Finally, the <a href="http://doc.rust-lang.org/std/prelude/"><code>prelude</code></a> defines a
+common set of traits, types, and functions that are made available
+to all code by default. <a href="http://doc.rust-lang.org/std/macros/"><code>macros</code></a> contains
+all the standard macros, such as <code>assert!</code>, <code>panic!</code>, <code>println!</code>,
+and <code>format!</code>, also available to all Rust code.</p>
+</div><h2 id="primitives" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#primitives">Primitive Types</a></h2>
+<table>
+                    <tbody><tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.bool.html" title="std::bool">bool</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>The boolean type</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.f32.html" title="std::f32">f32</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for 32-bits floats (<code>f32</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.f64.html" title="std::f64">f64</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for 64-bits floats (<code>f64</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.i16.html" title="std::i16">i16</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for signed 16-bits integers (<code>i16</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.i32.html" title="std::i32">i32</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for signed 32-bits integers (<code>i32</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.i64.html" title="std::i64">i64</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for signed 64-bits integers (<code>i64</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.i8.html" title="std::i8">i8</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for signed 8-bits integers (<code>i8</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.isize.html" title="std::isize">isize</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for pointer-sized signed integers (<code>isize</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.slice.html" title="std::slice">slice</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Utilities for slice manipulation</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.str.html" title="std::str">str</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Unicode string manipulation (<code>str</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.tuple.html" title="std::tuple">tuple</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations on tuples</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.u16.html" title="std::u16">u16</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for unsigned 16-bits integers (<code>u16</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.u32.html" title="std::u32">u32</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for unsigned 32-bits integers (<code>u32</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.u64.html" title="std::u64">u64</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for unsigned 64-bits integer (<code>u64</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.u8.html" title="std::u8">u8</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for unsigned 8-bits integers (<code>u8</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="primitive" href="http://doc.rust-lang.org/std/primitive.usize.html" title="std::usize">usize</a></td>
+                        <td class="docblock short nowrap" style="width: 866px;"><p>Operations and constants for pointer-sized unsigned integers (<code>usize</code> type)</p>
+</td>
+                    </tr>
+                </tbody></table><h2 id="modules" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#modules">Modules</a></h2>
+<table>
+                    <tbody><tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/any/" title="std::any">any</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Traits for dynamic typing of any <code>'static</code> type (through runtime reflection)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable: unsure about placement and naming"></a><a class="mod" href="http://doc.rust-lang.org/std/ascii/" title="std::ascii">ascii</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations on ASCII strings and characters</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable: recently added as part of collections reform"></a><a class="mod" href="http://doc.rust-lang.org/std/borrow/" title="std::borrow">borrow</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>A module for working with borrowed data.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/boxed/" title="std::boxed">boxed</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>A pointer type for heap allocation.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/cell/" title="std::cell">cell</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Shareable mutable containers.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/char/" title="std::char">char</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Character manipulation (<code>char</code> type, Unicode Scalar Value)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/clone/" title="std::clone">clone</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>The <code>Clone</code> trait for types that cannot be 'implicitly copied'</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/cmp/" title="std::cmp">cmp</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Defines the <code>PartialOrd</code> and <code>PartialEq</code> comparison traits.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/collections/" title="std::collections">collections</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Collection types.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/default/" title="std::default">default</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>The <code>Default</code> trait for types which may have meaningful default values.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/dynamic_lib/" title="std::dynamic_lib">dynamic_lib</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Dynamic library facilities.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/error/" title="std::error">error</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Traits for working with Errors.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/f32/" title="std::f32">f32</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for 32-bits floats (<code>f32</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/f64/" title="std::f64">f64</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for 64-bits floats (<code>f64</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable: module just underwent fairly large reorganization and the dust still needs to settle"></a><a class="mod" href="http://doc.rust-lang.org/std/ffi/" title="std::ffi">ffi</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Utilities related to FFI bindings.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Deprecated" title="Deprecated: It is unclear if this module is more robust than implementing Drop on a custom type, and this module is being removed with no replacement. Use a custom Drop implementation to regain existing functionality."></a><a class="mod" href="http://doc.rust-lang.org/std/finally/" title="std::finally">finally</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>The Finally trait provides a method, <code>finally</code> on
+stack closures that emulates Java-style try/finally blocks.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/fmt/" title="std::fmt">fmt</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Utilities for formatting and printing strings</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable: module was recently redesigned"></a><a class="mod" href="http://doc.rust-lang.org/std/hash/" title="std::hash">hash</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Generic hashing support.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/i16/" title="std::i16">i16</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for signed 16-bits integers (<code>i16</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/i32/" title="std::i32">i32</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for signed 32-bits integers (<code>i32</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/i64/" title="std::i64">i64</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for signed 64-bits integers (<code>i64</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/i8/" title="std::i8">i8</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for signed 8-bits integers (<code>i8</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Deprecated" title="Deprecated: replaced by isize"></a><a class="mod" href="http://doc.rust-lang.org/std/int/" title="std::int">int</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Deprecated: replaced by <code>isize</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/intrinsics/" title="std::intrinsics">intrinsics</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>rustc compiler intrinsics.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/isize/" title="std::isize">isize</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for pointer-sized signed integers (<code>isize</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/iter/" title="std::iter">iter</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Composable external iterators</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/marker/" title="std::marker">marker</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Primitive traits and marker types representing basic 'kinds' of types.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/mem/" title="std::mem">mem</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Basic functions for dealing with memory</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/num/" title="std::num">num</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Numeric traits and functions for generic mathematics</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/old_io/" title="std::old_io">old_io</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>I/O, including files, networking, timers, and processes</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/ops/" title="std::ops">ops</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Overloadable operators</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/option/" title="std::option">option</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Optional values</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/os/" title="std::os">os</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Higher-level interfaces to libc::* functions and operating system services.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/path/" title="std::path">path</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Cross-platform path support</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/prelude/" title="std::prelude">prelude</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>The Rust prelude</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/ptr/" title="std::ptr">ptr</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations on unsafe pointers, <code>*const T</code>, and <code>*mut T</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/rand/" title="std::rand">rand</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Utilities for random number generation</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/raw/" title="std::raw">raw</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Contains struct definitions for the layout of compiler built-in types.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/rc/" title="std::rc">rc</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Thread-local reference-counted boxes (the <code>Rc&lt;T&gt;</code> type).</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/result/" title="std::result">result</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Error handling with the <code>Result</code> type</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/rt/" title="std::rt">rt</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Runtime services</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unstable" title="Unstable"></a><a class="mod" href="http://doc.rust-lang.org/std/simd/" title="std::simd">simd</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>SIMD vectors.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/slice/" title="std::slice">slice</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Utilities for slice manipulation</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/str/" title="std::str">str</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Unicode string manipulation (<code>str</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/string/" title="std::string">string</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>An owned, growable string that enforces that its contents are valid UTF-8.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/sync/" title="std::sync">sync</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Useful synchronization primitives</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/thread/" title="std::thread">thread</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Native threads</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/thread_local/" title="std::thread_local">thread_local</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Thread local storage</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="mod" href="http://doc.rust-lang.org/std/thunk/" title="std::thunk">thunk</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="mod" href="http://doc.rust-lang.org/std/time/" title="std::time">time</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Temporal quantification.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/u16/" title="std::u16">u16</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for unsigned 16-bits integers (<code>u16</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/u32/" title="std::u32">u32</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for unsigned 32-bits integers (<code>u32</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/u64/" title="std::u64">u64</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for unsigned 64-bits integer (<code>u64</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/u8/" title="std::u8">u8</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for unsigned 8-bits integers (<code>u8</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Deprecated" title="Deprecated: replaced by usize"></a><a class="mod" href="http://doc.rust-lang.org/std/uint/" title="std::uint">uint</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Deprecated: replaced by <code>usize</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/usize/" title="std::usize">usize</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>Operations and constants for pointer-sized unsigned integers (<code>usize</code> type)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Stable" title="Stable"></a><a class="mod" href="http://doc.rust-lang.org/std/vec/" title="std::vec">vec</a></td>
+                        <td class="docblock short nowrap" style="width: 812px;"><p>A growable list type with heap-allocated contents, written <code>Vec&lt;T&gt;</code> but pronounced 'vector.'</p>
+</td>
+                    </tr>
+                </tbody></table><h2 id="macros" class="section-header"><a href="http://doc.rust-lang.org/std/index.html#macros">Macros</a></h2>
+<table>
+                    <tbody><tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.assert!.html" title="std::assert!">assert!</a></td>
+                        <td class="docblock short nowrap" style="width: 748px;"><p>Ensure that a boolean expression is <code>true</code> at runtime.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.assert_eq!.html" title="std::assert_eq!">assert_eq!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Asserts that two expressions are equal to each other, testing equality in
+both directions.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.cfg!.html" title="std::cfg!">cfg!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Boolean evaluation of configuration flags.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.column!.html" title="std::column!">column!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A macro which expands to the column number on which it was invoked.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.concat!.html" title="std::concat!">concat!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Concatenates literals into a static string slice.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.concat_idents!.html" title="std::concat_idents!">concat_idents!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Concatenate identifiers into one identifier.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.debug_assert!.html" title="std::debug_assert!">debug_assert!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Ensure that a boolean expression is <code>true</code> at runtime.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.debug_assert_eq!.html" title="std::debug_assert_eq!">debug_assert_eq!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Asserts that two expressions are equal to each other, testing equality in
+both directions.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.env!.html" title="std::env!">env!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Inspect an environment variable at compile time.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.file!.html" title="std::file!">file!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A macro which expands to the file name from which it was invoked.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.format!.html" title="std::format!">format!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Use the syntax described in <code>std::fmt</code> to create a value of type <code>String</code>.
+See <code>std::fmt</code> for more information.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.format_args!.html" title="std::format_args!">format_args!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>The core macro for formatted string creation &amp; output.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.include_bytes!.html" title="std::include_bytes!">include_bytes!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Includes a file as a byte slice.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.include_str!.html" title="std::include_str!">include_str!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Includes a utf8-encoded file as a string.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.line!.html" title="std::line!">line!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A macro which expands to the line number on which it was invoked.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.module_path!.html" title="std::module_path!">module_path!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Expands to a string that represents the current module path.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.option_env!.html" title="std::option_env!">option_env!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Optionally inspect an environment variable at compile time.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.panic!.html" title="std::panic!">panic!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>The entry point for panic of Rust tasks.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.print!.html" title="std::print!">print!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Equivalent to the <code>println!</code> macro except that a newline is not printed at
+the end of the message.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.println!.html" title="std::println!">println!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Macro for printing to a task's stdout handle.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.scoped_thread_local!.html" title="std::scoped_thread_local!">scoped_thread_local!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Declare a new scoped thread local storage key.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.select!.html" title="std::select!">select!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A macro to select an event from a number of receivers.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.stringify!.html" title="std::stringify!">stringify!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A macro which stringifies its argument.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.thread_local!.html" title="std::thread_local!">thread_local!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Declare a new thread local storage key of type <code>std::thread_local::Key</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.try!.html" title="std::try!">try!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Helper macro for unwrapping <code>Result</code> values while returning early with an
+error if the value of the expression is <code>Err</code>. For more information, see
+<code>std::io</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.unimplemented!.html" title="std::unimplemented!">unimplemented!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A standardised placeholder for marking unfinished code. It panics with the
+message <code>"not yet implemented"</code> when executed.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.unreachable!.html" title="std::unreachable!">unreachable!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>A utility macro for indicating unreachable code.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.vec!.html" title="std::vec!">vec!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Creates a <code>Vec</code> containing the arguments.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.write!.html" title="std::write!">write!</a></td>
+                        <td class="docblock short nowrap" style="width: 731px;"><p>Use the <code>format!</code> syntax to write data into a buffer of type <code>&amp;mut Writer</code>.
+See <code>std::fmt</code> for more information.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class="stability Unmarked" title="No stability level"></a><a class="macro" href="http://doc.rust-lang.org/std/macro.writeln!.html" title="std::writeln!">writeln!</a></td>
+                        <td class="docblock short nowrap" style="width: 748px;"><p>Equivalent to the <code>write!</code> macro, except that a newline is appended after
+the message is written.</p>
+</td>
+                    </tr>
+                </tbody></table></section>
+    <section id="search" class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>⇤</dt>
+                <dd>Move up in search results</dd>
+                <dt>⇥</dt>
+                <dd>Move down in search results</dd>
+                <dt>⏎</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="./jquery.js"></script>
+    <script src="./main.js"></script>
+    <script src="./playpen.js"></script>
+    <script async="" src="./search-index.js"></script>
+
+</body></html>

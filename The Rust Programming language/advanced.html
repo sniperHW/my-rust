@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Advanced</title>
+
+    <link rel="stylesheet" type="text/css" href="rust-book.css">
+
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="nav">
+                <button id="toggle-nav">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </button>
+              </div>
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='README.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='basic.html'><b>2.</b> I: The Basics</a>
+<ul class='section'>
+<li><a href='installing-rust.html'><b>2.1.</b> Installing Rust</a>
+</li>
+<li><a href='hello-world.html'><b>2.2.</b> Hello, world!</a>
+</li>
+<li><a href='hello-cargo.html'><b>2.3.</b> Hello, Cargo!</a>
+</li>
+<li><a href='variable-bindings.html'><b>2.4.</b> Variable Bindings</a>
+</li>
+<li><a href='if.html'><b>2.5.</b> If</a>
+</li>
+<li><a href='functions.html'><b>2.6.</b> Functions</a>
+</li>
+<li><a href='comments.html'><b>2.7.</b> Comments</a>
+</li>
+<li><a href='compound-data-types.html'><b>2.8.</b> Compound Data Types</a>
+</li>
+<li><a href='match.html'><b>2.9.</b> Match</a>
+</li>
+<li><a href='looping.html'><b>2.10.</b> Looping</a>
+</li>
+<li><a href='strings.html'><b>2.11.</b> Strings</a>
+</li>
+<li><a href='arrays-vectors-and-slices.html'><b>2.12.</b> Arrays, Vectors, and Slices</a>
+</li>
+<li><a href='standard-input.html'><b>2.13.</b> Standard Input</a>
+</li>
+<li><a href='guessing-game.html'><b>2.14.</b> Guessing Game</a>
+</li>
+</ul>
+</li>
+<li><a href='intermediate.html'><b>3.</b> II: Intermediate Rust</a>
+<ul class='section'>
+<li><a href='more-strings.html'><b>3.1.</b> More Strings</a>
+</li>
+<li><a href='crates-and-modules.html'><b>3.2.</b> Crates and Modules</a>
+</li>
+<li><a href='testing.html'><b>3.3.</b> Testing</a>
+</li>
+<li><a href='pointers.html'><b>3.4.</b> Pointers</a>
+</li>
+<li><a href='ownership.html'><b>3.5.</b> Ownership</a>
+</li>
+<li><a href='patterns.html'><b>3.6.</b> Patterns</a>
+</li>
+<li><a href='method-syntax.html'><b>3.7.</b> Method Syntax</a>
+</li>
+<li><a href='closures.html'><b>3.8.</b> Closures</a>
+</li>
+<li><a href='iterators.html'><b>3.9.</b> Iterators</a>
+</li>
+<li><a href='generics.html'><b>3.10.</b> Generics</a>
+</li>
+<li><a href='traits.html'><b>3.11.</b> Traits</a>
+</li>
+<li><a href='threads.html'><b>3.12.</b> Threads</a>
+</li>
+<li><a href='error-handling.html'><b>3.13.</b> Error Handling</a>
+</li>
+<li><a href='documentation.html'><b>3.14.</b> Documentation</a>
+</li>
+</ul>
+</li>
+<li><a href='advanced.html'><b>4.</b> III: Advanced Topics</a>
+<ul class='section'>
+<li><a href='ffi.html'><b>4.1.</b> FFI</a>
+</li>
+<li><a href='unsafe.html'><b>4.2.</b> Unsafe Code</a>
+</li>
+<li><a href='macros.html'><b>4.3.</b> Macros</a>
+</li>
+<li><a href='plugins.html'><b>4.4.</b> Compiler Plugins</a>
+</li>
+</ul>
+</li>
+<li><a href='conclusion.html'><b>5.</b> Conclusion</a>
+</li>
+</ul>
+</div>
+<div id='page-wrapper'>
+<div id='page'>
+
+
+    <h1 class="title">Advanced</h1>
+    <p>In a similar fashion to &quot;Intermediate,&quot; this section is full of individual,
+deep-dive chapters, which stand alone and can be read in any order. These
+chapters focus on the most complex features, as well as some things that
+are only available in upcoming versions of Rust.</p>
+
+<p>After reading &quot;Advanced,&quot; you&#39;ll be a Rust expert!</p>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "";
+    </script>
+    
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function(event) {
+  document.getElementById("toggle-nav").onclick = toggleNav;
+  function toggleNav() {
+    var toc = document.getElementById("toc");
+    var pagewrapper = document.getElementById("page-wrapper");
+    toggleClass(toc, "mobile-hidden");
+    toggleClass(pagewrapper, "mobile-hidden");
+  };
+
+  function toggleClass(el, className) {
+     // from http://youmightnotneedjquery.com/
+     if (el.classList) {
+       el.classList.toggle(className);
+     } else {
+       var classes = el.className.split(' ');
+       var existingIndex = classes.indexOf(className);
+
+       if (existingIndex >= 0) {
+         classes.splice(existingIndex, 1);
+       } else {
+         classes.push(className);
+       }
+
+       el.className = classes.join(' ');
+     }
+  }
+});
+</script>
+</div></div>
+
+
+</body>
+</html>
